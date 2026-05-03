@@ -367,9 +367,10 @@
       </div>
 
       <div class="form-group">
-        <label>简历链接（如有上传至网盘可贴链接）</label>
-        <input type="text" name="resume_url" placeholder="https://...">
-        <p class="note">文件直接上传功能后续接入，当前请先用网盘链接</p>
+        <label>上传简历（PDF/Word，10MB以内）</label>
+        <input type="file" id="resumeFile" accept=".pdf,.doc,.docx">
+        <input type="hidden" name="resume_url" id="resumeUrlInput">
+        <p class="note" id="uploadStatus">未选择文件</p>
       </div>
 
       <button type="submit" id="submitBtn">提交评估申请</button>
@@ -399,6 +400,19 @@
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: { persistSession: false, autoRefreshToken: false }
     });
+    let currentFile = null;
+    document.getElementById('resumeFile').addEventListener('change', (e) => {
+      currentFile = e.target.files[0];
+      const status = document.getElementById('uploadStatus');
+      if (currentFile) {
+        if (currentFile.size > 10 * 1024 * 1024) {
+          status.textContent = '文件超过10MB限制';
+          currentFile = null; e.target.value = '';
+        } else {
+          status.textContent = '已选择: ' + currentFile.name;
+        }
+      }
+    });
 
     function collectCheckbox(groupId, inputId) {
       const boxes = document.querySelectorAll(`#${groupId} input:checked`);
@@ -425,6 +439,20 @@
       collectCheckbox('langGroup', 'languagesInput');
       collectCheckbox('countryGroup', 'targetCountryInput');
       collectCheckbox('reasonGroup', 'reasonInput');
+
+      // 上传简历
+      if (currentFile) {
+        const fileName = Date.now() + '_' + currentFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const { error: uploadError } = await supabaseClient
+          .storage.from('resumes').upload(fileName, currentFile, { contentType: currentFile.type });
+        if (uploadError) {
+          showMsg('简历上传失败：' + uploadError.message, 'error');
+          btn.disabled = false; btn.textContent = '提交评估申请';
+          return;
+        }
+        const { data: urlData } = supabaseClient.storage.from('resumes').getPublicUrl(fileName);
+        document.getElementById('resumeUrlInput').value = urlData.publicUrl;
+      }
 
       // 手动校验多选必填项
       if (!document.getElementById('languagesInput').value) {
