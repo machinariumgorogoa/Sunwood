@@ -28,12 +28,7 @@
     .radio-group label{font-weight:400;display:flex;align-items:center;gap:4px;cursor:pointer;font-size:.9rem;color:#555}
     .checkbox-group{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
     .checkbox-group label{font-weight:400;display:flex;align-items:center;gap:4px;cursor:pointer;font-size:.9rem;color:#555}
-    details{background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:15px;overflow:hidden}
-    summary{padding:12px 15px;font-weight:600;color:#1e3a5f;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between}
-    summary::-webkit-details-marker{display:none}
-    summary::after{content:'+';font-size:1.2rem}
-    details[open] summary::after{content:'−'}
-    .details-content{padding:15px;border-top:1px solid #e5e7eb}
+    .section-title{font-size:1.05rem;font-weight:700;color:#1e3a5f;margin:25px 0 15px;padding-bottom:8px;border-bottom:2px solid #e5e7eb}
     button[type="submit"]{width:100%;padding:14px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s;margin-top:10px}
     button[type="submit"]:hover{opacity:.9}
     button[type="submit"]:disabled{opacity:.5;cursor:not-allowed}
@@ -75,6 +70,7 @@
 
     <form id="assessmentForm">
       <!-- 基础信息 -->
+      <div class="section-title">基础信息</div>
       <div class="row">
         <div class="form-group">
           <label>姓名（中文）<span class="req">*</span></label>
@@ -143,235 +139,212 @@
       </div>
 
       <!-- 教育背景 -->
-      <details>
-        <summary>教育背景</summary>
-        <div class="details-content">
-          <div class="row">
-            <div class="form-group">
-              <label>最高学历<span class="req">*</span></label>
-              <select name="highest_education" required>
-                <option value="">请选择</option>
-                <option>博士</option><option>硕士</option><option>本科</option><option>大专</option><option>高中及以下</option><option>其他</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>专业<span class="req">*</span></label>
-              <input type="text" name="major" required>
-            </div>
-          </div>
-          <div class="row">
-            <div class="form-group">
-              <label>毕业国家<span class="req">*</span></label>
-              <input type="text" name="grad_country" required>
-            </div>
-            <div class="form-group">
-              <label>毕业学校<span class="req">*</span></label>
-              <input type="text" name="grad_school" required>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>毕业时间<span class="req">*</span></label>
-            <input type="date" name="grad_date" required>
-          </div>
+      <div class="section-title">教育背景</div>
+      <div class="row">
+        <div class="form-group">
+          <label>最高学历<span class="req">*</span></label>
+          <select name="highest_education" required>
+            <option value="">请选择</option>
+            <option>博士</option><option>硕士</option><option>本科</option><option>大专</option><option>高中及以下</option><option>其他</option>
+          </select>
         </div>
-      </details>
+        <div class="form-group">
+          <label>专业<span class="req">*</span></label>
+          <input type="text" name="major" required>
+        </div>
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <label>毕业国家<span class="req">*</span></label>
+          <input type="text" name="grad_country" required>
+        </div>
+        <div class="form-group">
+          <label>毕业学校<span class="req">*</span></label>
+          <input type="text" name="grad_school" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>毕业时间<span class="req">*</span></label>
+        <input type="date" name="grad_date" required>
+      </div>
 
       <!-- 职业背景 -->
-      <details>
-        <summary>职业背景</summary>
-        <div class="details-content">
-          <div class="row">
-            <div class="form-group">
-              <label>目前职业身份<span class="req">*</span></label>
-              <select name="occupation_status" required>
-                <option value="">请选择</option>
-                <option>企业主</option><option>公司职员</option><option>自由职业者</option><option>学生</option><option>无业</option><option>退休</option><option>其他</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>当前职业 / 职位<span class="req">*</span></label>
-              <input type="text" name="current_job_title" placeholder="例如：税务经理（财务），质量总监（生产）" required>
-            </div>
-          </div>
-          <div class="row">
-            <div class="form-group">
-              <label>总工作年限<span class="req">*</span></label>
-              <input type="number" name="total_work_years" min="0" max="60" required>
-            </div>
-            <div class="form-group">
-              <label>是否有管理经验<span class="req">*</span></label>
-              <select name="has_management_exp" required>
-                <option value="">请选择</option>
-                <option>是</option><option>否</option><option>其他</option>
-              </select>
-            </div>
-          </div>
-          <div class="row">
-            <div class="form-group">
-              <label>工作所在国家<span class="req">*</span></label>
-              <input type="text" name="work_countries" placeholder="多个国家请用逗号隔开" required>
-            </div>
-            <div class="form-group">
-              <label>是否与所学专业相关<span class="req">*</span></label>
-              <select name="major_related" required>
-                <option value="">请选择</option>
-                <option>是</option><option>否</option><option>其他</option>
-              </select>
-            </div>
-          </div>
+      <div class="section-title">职业背景</div>
+      <div class="row">
+        <div class="form-group">
+          <label>目前职业身份<span class="req">*</span></label>
+          <select name="occupation_status" required>
+            <option value="">请选择</option>
+            <option>企业主</option><option>公司职员</option><option>自由职业者</option><option>学生</option><option>无业</option><option>退休</option><option>其他</option>
+          </select>
         </div>
-      </details>
+        <div class="form-group">
+          <label>当前职业 / 职位<span class="req">*</span></label>
+          <input type="text" name="current_job_title" placeholder="例如：税务经理（财务），质量总监（生产）" required>
+        </div>
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <label>总工作年限<span class="req">*</span></label>
+          <input type="number" name="total_work_years" min="0" max="60" required>
+        </div>
+        <div class="form-group">
+          <label>是否有管理经验<span class="req">*</span></label>
+          <select name="has_management_exp" required>
+            <option value="">请选择</option>
+            <option>是</option><option>否</option><option>其他</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <label>工作所在国家<span class="req">*</span></label>
+          <input type="text" name="work_countries" placeholder="多个国家请用逗号隔开" required>
+        </div>
+        <div class="form-group">
+          <label>是否与所学专业相关<span class="req">*</span></label>
+          <select name="major_related" required>
+            <option value="">请选择</option>
+            <option>是</option><option>否</option><option>其他</option>
+          </select>
+        </div>
+      </div>
 
       <!-- 语言能力 -->
-      <details>
-        <summary>语言能力</summary>
-        <div class="details-content">
-          <div class="form-group">
-            <label>具备何种外语能力（至少选一项）<span class="req">*</span></label>
-            <div class="checkbox-group" id="langGroup">
-              <label><input type="checkbox" value="英语"> 英语</label>
-              <label><input type="checkbox" value="日语"> 日语</label>
-              <label><input type="checkbox" value="法语"> 法语</label>
-              <label><input type="checkbox" value="德语"> 德语</label>
-              <label><input type="checkbox" value="西班牙语"> 西班牙语</label>
-              <label><input type="checkbox" value="无"> 无</label>
-              <label><input type="checkbox" value="其他"> 其他</label>
-            </div>
-            <input type="hidden" name="languages" id="languagesInput">
-          </div>
-          <div class="row">
-            <div class="form-group">
-              <label>IELTS 成绩</label>
-              <input type="text" name="ielts_score" placeholder="未参加可跳过">
-            </div>
-            <div class="form-group">
-              <label>PTE 成绩</label>
-              <input type="text" name="pte_score" placeholder="未参加可跳过">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>其它英语考试成绩</label>
-            <input type="text" name="other_english_score">
-          </div>
+      <div class="section-title">语言能力</div>
+      <div class="form-group">
+        <label>具备何种外语能力（至少选一项）<span class="req">*</span></label>
+        <div class="checkbox-group" id="langGroup">
+          <label><input type="checkbox" value="英语"> 英语</label>
+          <label><input type="checkbox" value="日语"> 日语</label>
+          <label><input type="checkbox" value="法语"> 法语</label>
+          <label><input type="checkbox" value="德语"> 德语</label>
+          <label><input type="checkbox" value="西班牙语"> 西班牙语</label>
+          <label><input type="checkbox" value="无"> 无</label>
+          <label><input type="checkbox" value="其他"> 其他</label>
         </div>
-      </details>
+        <input type="hidden" name="languages" id="languagesInput">
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <label>IELTS 成绩</label>
+          <input type="text" name="ielts_score" placeholder="未参加可跳过">
+        </div>
+        <div class="form-group">
+          <label>PTE 成绩</label>
+          <input type="text" name="pte_score" placeholder="未参加可跳过">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>其它英语考试成绩</label>
+        <input type="text" name="other_english_score">
+      </div>
 
       <!-- 职业评估与证书 -->
-      <details>
-        <summary>职业评估与证书</summary>
-        <div class="details-content">
-          <div class="row">
-            <div class="form-group">
-              <label>是否做过职业评估<span class="req">*</span></label>
-              <select name="skills_assessed" required>
-                <option value="">请选择</option>
-                <option>是</option><option>否</option><option>其他</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>是否持有相关职业证书 / licence<span class="req">*</span></label>
-              <select name="has_licence" required>
-                <option value="">请选择</option>
-                <option>是</option><option>否</option><option>其他</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>持有哪些相关职业证书 / licence</label>
-            <input type="text" name="licence_details" placeholder="若无可跳过">
-          </div>
+      <div class="section-title">职业评估与证书</div>
+      <div class="row">
+        <div class="form-group">
+          <label>是否做过职业评估<span class="req">*</span></label>
+          <select name="skills_assessed" required>
+            <option value="">请选择</option>
+            <option>是</option><option>否</option><option>其他</option>
+          </select>
         </div>
-      </details>
+        <div class="form-group">
+          <label>是否持有相关职业证书 / licence<span class="req">*</span></label>
+          <select name="has_licence" required>
+            <option value="">请选择</option>
+            <option>是</option><option>否</option><option>其他</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>持有哪些相关职业证书 / licence</label>
+        <input type="text" name="licence_details" placeholder="若无可跳过">
+      </div>
 
       <!-- 配偶信息 -->
-      <details>
-        <summary>配偶 / 伴侣信息</summary>
-        <div class="details-content">
-          <div class="row">
-            <div class="form-group">
-              <label>是否有配偶 / 伴侣<span class="req">*</span></label>
-              <select name="has_spouse" required>
-                <option value="">请选择</option>
-                <option>是</option><option>否</option><option>其他</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>配偶/伴侣最高学历</label>
-              <select name="spouse_education">
-                <option value="">请选择</option>
-                <option>博士</option><option>硕士</option><option>本科</option><option>大专</option><option>高中及以下</option><option>其他</option>
-              </select>
-            </div>
-          </div>
-          <div class="row">
-            <div class="form-group">
-              <label>配偶/伴侣职业身份</label>
-              <select name="spouse_occupation_status">
-                <option value="">请选择</option>
-                <option>企业主</option><option>公司职员</option><option>自由职业者</option><option>学生</option><option>无业</option><option>退休</option><option>其他</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>配偶工作年限</label>
-              <input type="number" name="spouse_work_years" min="0" max="60">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>配偶英语成绩</label>
-            <input type="text" name="spouse_english_score">
-          </div>
+      <div class="section-title">配偶 / 伴侣信息</div>
+      <div class="row">
+        <div class="form-group">
+          <label>是否有配偶 / 伴侣<span class="req">*</span></label>
+          <select name="has_spouse" required>
+            <option value="">请选择</option>
+            <option>是</option><option>否</option><option>其他</option>
+          </select>
         </div>
-      </details>
+        <div class="form-group">
+          <label>配偶/伴侣最高学历</label>
+          <select name="spouse_education">
+            <option value="">请选择</option>
+            <option>博士</option><option>硕士</option><option>本科</option><option>大专</option><option>高中及以下</option><option>其他</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <label>配偶/伴侣职业身份</label>
+          <select name="spouse_occupation_status">
+            <option value="">请选择</option>
+            <option>企业主</option><option>公司职员</option><option>自由职业者</option><option>学生</option><option>无业</option><option>退休</option><option>其他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>配偶工作年限</label>
+          <input type="number" name="spouse_work_years" min="0" max="60">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>配偶英语成绩</label>
+        <input type="text" name="spouse_english_score">
+      </div>
 
       <!-- 移民意向 -->
-      <details>
-        <summary>移民意向</summary>
-        <div class="details-content">
-          <div class="row">
-            <div class="form-group">
-              <label>想申请移民的国家</label>
-              <div class="checkbox-group" id="countryGroup">
-                <label><input type="checkbox" value="澳大利亚"> 澳大利亚</label>
-                <label><input type="checkbox" value="新西兰"> 新西兰</label>
-                <label><input type="checkbox" value="新加坡"> 新加坡</label>
-                <label><input type="checkbox" value="其他"> 其他</label>
-              </div>
-              <input type="hidden" name="target_country" id="targetCountryInput">
-            </div>
-            <div class="form-group">
-              <label>是否愿意去偏远地区<span class="req">*</span></label>
-              <select name="willing_regional" required>
-                <option value="">请选择</option>
-                <option>是</option><option>否</option><option>其他</option>
-              </select>
-            </div>
+      <div class="section-title">移民意向</div>
+      <div class="row">
+        <div class="form-group">
+          <label>想申请移民的国家</label>
+          <div class="checkbox-group" id="countryGroup">
+            <label><input type="checkbox" value="澳大利亚"> 澳大利亚</label>
+            <label><input type="checkbox" value="新西兰"> 新西兰</label>
+            <label><input type="checkbox" value="新加坡"> 新加坡</label>
+            <label><input type="checkbox" value="其他"> 其他</label>
           </div>
-          <div class="row">
-            <div class="form-group">
-              <label>澳洲雇主担保移民意向确认<span class="req">*</span></label>
-              <select name="immigration_intent" required>
-                <option value="">请选择</option>
-                <option>有</option><option>暂无计划</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>申请主要原因（至少选一项）<span class="req">*</span></label>
-              <div class="checkbox-group" id="reasonGroup">
-                <label><input type="checkbox" value="子女教育"> 子女教育</label>
-                <label><input type="checkbox" value="就业/事业发展"> 就业/事业发展</label>
-                <label><input type="checkbox" value="环境改善"> 环境改善</label>
-                <label><input type="checkbox" value="养老"> 养老</label>
-                <label><input type="checkbox" value="资产规划"> 资产规划</label>
-                <label><input type="checkbox" value="家人团聚"> 家人团聚</label>
-                <label><input type="checkbox" value="其他"> 其他</label>
-              </div>
-              <input type="hidden" name="immigration_reason" id="reasonInput">
-            </div>
-          </div>
+          <input type="hidden" name="target_country" id="targetCountryInput">
         </div>
-      </details>
+        <div class="form-group">
+          <label>是否愿意去偏远地区<span class="req">*</span></label>
+          <select name="willing_regional" required>
+            <option value="">请选择</option>
+            <option>是</option><option>否</option><option>其他</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <label>澳洲雇主担保移民意向确认<span class="req">*</span></label>
+          <select name="immigration_intent" required>
+            <option value="">请选择</option>
+            <option>有</option><option>暂无计划</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>申请主要原因（至少选一项）<span class="req">*</span></label>
+          <div class="checkbox-group" id="reasonGroup">
+            <label><input type="checkbox" value="子女教育"> 子女教育</label>
+            <label><input type="checkbox" value="就业/事业发展"> 就业/事业发展</label>
+            <label><input type="checkbox" value="环境改善"> 环境改善</label>
+            <label><input type="checkbox" value="养老"> 养老</label>
+            <label><input type="checkbox" value="资产规划"> 资产规划</label>
+            <label><input type="checkbox" value="家人团聚"> 家人团聚</label>
+            <label><input type="checkbox" value="其他"> 其他</label>
+          </div>
+          <input type="hidden" name="immigration_reason" id="reasonInput">
+        </div>
+      </div>
 
       <!-- 联系方式 -->
+      <div class="section-title">联系方式</div>
       <div class="row">
         <div class="form-group">
           <label>手机<span class="req">*</span></label>
@@ -419,14 +392,14 @@
   </footer>
 
   <script>
-    // ===== 配置区 =====
     const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
 
-    // 关键修复：变量名改为 supabaseClient，避免与 CDN 全局对象冲突
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // 关键修复1：禁用本地存储，避免浏览器跟踪防护拦截
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
 
-    // 多选框收集
     function collectCheckbox(groupId, inputId) {
       const boxes = document.querySelectorAll(`#${groupId} input:checked`);
       document.getElementById(inputId).value = Array.from(boxes).map(b => b.value).join(', ');
@@ -436,19 +409,24 @@
     document.getElementById('countryGroup').addEventListener('change', () => collectCheckbox('countryGroup', 'targetCountryInput'));
     document.getElementById('reasonGroup').addEventListener('change', () => collectCheckbox('reasonGroup', 'reasonInput'));
 
-    // 提交表单
+    function showMsg(text, type) {
+      const msg = document.getElementById('msg');
+      msg.style.display = 'block';
+      msg.className = 'message ' + type;
+      msg.textContent = text;
+    }
+
     document.getElementById('assessmentForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
       btn.textContent = '提交中...';
 
-      // 收集多选
       collectCheckbox('langGroup', 'languagesInput');
       collectCheckbox('countryGroup', 'targetCountryInput');
       collectCheckbox('reasonGroup', 'reasonInput');
 
-      // 校验多选必填项
+      // 手动校验多选必填项
       if (!document.getElementById('languagesInput').value) {
         showMsg('请至少选择一项外语能力', 'error');
         btn.disabled = false; btn.textContent = '提交评估申请';
@@ -479,14 +457,6 @@
       btn.textContent = '提交评估申请';
     });
 
-    function showMsg(text, type) {
-      const msg = document.getElementById('msg');
-      msg.style.display = 'block';
-      msg.className = 'message ' + type;
-      msg.textContent = text;
-    }
-
-    // 查询记录
     async function loadRecords() {
       const container = document.getElementById('recordsTable');
       container.innerHTML = '<p class="empty">加载中...</p>';
