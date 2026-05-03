@@ -303,14 +303,14 @@
       <div class="section-title">移民意向</div>
       <div class="row">
         <div class="form-group">
-          <label>想申请移民的国家</label>
+          <label>想申请移民的国家<span class="req">*</span></label>
           <div class="checkbox-group" id="countryGroup">
             <label><input type="checkbox" value="澳大利亚"> 澳大利亚</label>
             <label><input type="checkbox" value="新西兰"> 新西兰</label>
             <label><input type="checkbox" value="新加坡"> 新加坡</label>
             <label><input type="checkbox" value="其他"> 其他</label>
           </div>
-          <input type="hidden" name="target_country" id="targetCountryInput">
+          <input type="hidden" name="target_country" id="targetCountryInput" required>
         </div>
         <div class="form-group">
           <label>是否愿意去偏远地区<span class="req">*</span></label>
@@ -434,6 +434,11 @@
       }
       if (!document.getElementById('reasonInput').value) {
         showMsg('请至少选择一项申请主要原因', 'error');
+        btn.disabled = false; btn.textContent = '提交评估申请';
+        return;
+      }
+      if (!document.getElementById('targetCountryInput').value) {
+        showMsg('请至少选择一项想申请移民的国家', 'error');
         btn.disabled = false; btn.textContent = '提交评估申请';
         return;
       }
