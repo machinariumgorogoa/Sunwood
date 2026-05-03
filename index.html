@@ -1,210 +1,511 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>澳洲雇主担保移民评估 - Sunwood Consulting</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
-            min-height: 100vh;
-            color: #1e3a5f;
-        }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-        
-        /* 顶部品牌区 */
-        .brand-header {
-            background: white;
-            border-radius: 16px;
-            padding: 40px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(30, 58, 95, 0.08);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .brand-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #1e3a5f 0%, #c9a227 50%, #1e3a5f 100%);
-        }
-        
-        .brand-name {
-            font-size: 32px;
-            font-weight: 700;
-            color: #1e3a5f;
-            letter-spacing: 2px;
-            margin-bottom: 8px;
-        }
-        
-        .brand-subtitle {
-            font-size: 14px;
-            color: #c9a227;
-            font-weight: 600;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 24px;
-        }
-        
-        .service-title {
-            font-size: 24px;
-            color: #1e3a5f;
-            margin-bottom: 12px;
-            font-weight: 600;
-        }
-        
-        .service-tagline {
-            font-size: 16px;
-            color: #5a6c7d;
-            font-style: italic;
-        }
-        
-        .contact-info {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e8ecf1;
-            font-size: 14px;
-            color: #5a6c7d;
-        }
-        
-        .contact-info a {
-            color: #1e3a5f;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        
-        /* 表单标题区 */
-        .form-header {
-            background: white;
-            border-radius: 12px;
-            padding: 30px 40px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 12px rgba(30, 58, 95, 0.06);
-        }
-        
-        .form-title {
-            font-size: 22px;
-            color: #1e3a5f;
-            font-weight: 600;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .form-title::before {
-            content: '';
-            width: 4px;
-            height: 24px;
-            background: linear-gradient(180deg, #c9a227 0%, #1e3a5f 100%);
-            border-radius: 2px;
-        }
-        
-        .form-desc {
-            color: #5a6c7d;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        
-        /* 表单容器 */
-        .form-container {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 24px rgba(30, 58, 95, 0.1);
-        }
-        
-        iframe {
-            width: 100%;
-            border: none;
-            display: block;
-        }
-        
-        /* 底部 */
-        .footer {
-            text-align: center;
-            padding: 30px;
-            color: #8a9aac;
-            font-size: 12px;
-        }
-        
-        /* 响应式 */
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px 15px;
-            }
-            
-            .brand-header {
-                padding: 30px 20px;
-            }
-            
-            .brand-name {
-                font-size: 24px;
-            }
-            
-            .form-header {
-                padding: 20px;
-            }
-        }
-    </style>
-<base target="_blank">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>澳洲雇主担保移民评估 - Sunwood Consulting</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
+    .container{max-width:800px;margin:0 auto;padding:20px}
+    header{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border-radius:0 0 20px 20px;margin-bottom:30px}
+    header h1{font-size:1.8rem;font-weight:600;margin-bottom:8px;letter-spacing:1px}
+    header p{opacity:.9;font-size:.95rem}
+    .intro{background:#fff;padding:25px;border-radius:12px;margin-bottom:25px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .intro h2{color:#1e3a5f;font-size:1.2rem;margin-bottom:12px}
+    .intro ul{margin-left:20px;color:#555}
+    .intro li{margin-bottom:6px}
+    form{background:#fff;padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .form-group{margin-bottom:18px}
+    label{display:block;font-weight:600;color:#444;margin-bottom:6px;font-size:.9rem}
+    input[type="text"],input[type="email"],input[type="date"],input[type="number"],select,textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:.9rem;transition:border .2s}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:#2d5a87}
+    textarea{min-height:80px;resize:vertical}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    @media(max-width:600px){.row{grid-template-columns:1fr}}
+    .radio-group{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+    .radio-group label{font-weight:400;display:flex;align-items:center;gap:4px;cursor:pointer;font-size:.9rem;color:#555}
+    .checkbox-group{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+    .checkbox-group label{font-weight:400;display:flex;align-items:center;gap:4px;cursor:pointer;font-size:.9rem;color:#555}
+    details{background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:15px;overflow:hidden}
+    summary{padding:12px 15px;font-weight:600;color:#1e3a5f;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between}
+    summary::-webkit-details-marker{display:none}
+    summary::after{content:'+';font-size:1.2rem}
+    details[open] summary::after{content:'−'}
+    .details-content{padding:15px;border-top:1px solid #e5e7eb}
+    button[type="submit"]{width:100%;padding:14px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s;margin-top:10px}
+    button[type="submit"]:hover{opacity:.9}
+    button[type="submit"]:disabled{opacity:.5;cursor:not-allowed}
+    .message{padding:12px 15px;border-radius:8px;margin-bottom:20px;display:none;font-size:.9rem}
+    .message.success{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+    .message.error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+    .query-section{background:#fff;padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-top:25px}
+    .query-section h2{color:#1e3a5f;font-size:1.2rem;margin-bottom:15px}
+    table{width:100%;border-collapse:collapse;font-size:.85rem}
+    th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #eee}
+    th{color:#1e3a5f;font-weight:600;background:#f8fafc}
+    td{color:#555}
+    .empty{color:#999;font-style:italic;padding:20px 0}
+    .note{font-size:.8rem;color:#888;margin-top:4px}
+    footer{text-align:center;padding:30px;color:#999;font-size:.8rem}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- 品牌头部 -->
-        <div class="brand-header">
-            <div class="brand-name">SUNWOOD CONSULTING</div>
-            <div class="brand-subtitle">Future Management Consulting</div>
-            <div class="service-title">Migration and Education Service</div>
-            <div class="service-tagline">"Getting YOU on the plane to Australia"</div>
-            <div class="contact-info">
-                📞 <a href="tel:+61398191111">(03) 9819 1111</a> | 
-                🌐 <a href="https://sunwoods.com.au/" target="_blank">sunwoods.com.au</a>
-            </div>
-        </div>
-        
-        <!-- 表单标题 -->
-        <div class="form-header">
-            <div class="form-title">澳洲雇主担保移民评估表</div>
-            <div class="form-desc">
-                请填写以下信息，我们的移民专家将在2个工作日内与您联系，为您评估雇主担保可行性并制定专属移民方案。所有信息严格保密。
-            </div>
-        </div>
-        
-        <!-- 金数据表单 -->
-        <div class="form-container">
-            <iframe 
-                id="goldendata_form_nPpi5b" 
-                src="https://ruudcfow.jsjform.com/f/nPpi5b?background=white&banner=hide&inner_redirect=false&embedded=true" 
-                width="100%" 
-                height="3600" 
-                frameborder="0" 
-                allowTransparency="true">
-            </iframe>
-        </div>
-        
-        <!-- 底部 -->
-        <div class="footer">
-            © 2024 Sunwood Consulting Group. All rights reserved.
-        </div>
-    </div>
-</body>
+  <header>
+    <h1>SUNWOOD CONSULTING</h1>
+    <p>Future Management Consulting · Migration and Education Service</p>
+    <p style="margin-top:8px;font-size:.85rem">"Getting YOU on the plane to Australia"</p>
+  </header>
 
+  <div class="container">
+    <div class="intro">
+      <h2>雇主担保移民评估表</h2>
+      <p style="margin-bottom:12px;color:#555">想通过雇主担保圆梦澳洲？您的职业技能与澳洲机遇之间，只差这一步 ✨</p>
+      <ul>
+        <li>这是技术人才快速获得澳洲永居的理想途径，无需打分竞争</li>
+        <li>直接对接澳洲本地雇主需求，职业发展与身份规划一步到位</li>
+        <li>澳洲持牌移民律师精准评估，匹配最适合的雇主资源</li>
+        <li>所有信息严格保密，专家将在3个工作日内与您联系</li>
+      </ul>
+    </div>
+
+    <div id="msg" class="message"></div>
+
+    <form id="assessmentForm">
+      <!-- 基础信息 -->
+      <div class="row">
+        <div class="form-group">
+          <label>姓名（中文） *</label>
+          <input type="text" name="name_cn" required>
+        </div>
+        <div class="form-group">
+          <label>英文姓名</label>
+          <input type="text" name="name_en" placeholder="名在前，姓氏在后，例如：Alice Zhang">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>出生日期</label>
+          <input type="date" name="birth_date">
+        </div>
+        <div class="form-group">
+          <label>国籍</label>
+          <input type="text" name="nationality">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>当前居住国家</label>
+          <input type="text" name="current_country">
+        </div>
+        <div class="form-group">
+          <label>婚姻状况</label>
+          <select name="marital_status">
+            <option value="">请选择</option>
+            <option>未婚</option><option>已婚</option><option>离异</option><option>丧偶</option><option>其它</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>是否有子女</label>
+          <select name="has_children">
+            <option value="">请选择</option>
+            <option>是</option><option>否</option><option>其他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>当前签证类型</label>
+          <select name="current_visa_type">
+            <option value="">请选择</option>
+            <option>学生</option><option>工作</option><option>旅游</option><option>PR</option><option>其他</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>签证到期时间</label>
+          <input type="date" name="visa_expiry">
+        </div>
+        <div class="form-group">
+          <label>是否有签证拒签或取消记录</label>
+          <select name="visa_refused">
+            <option value="">请选择</option>
+            <option>是</option><option>否</option><option>其他</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 教育背景 -->
+      <details>
+        <summary>教育背景</summary>
+        <div class="details-content">
+          <div class="row">
+            <div class="form-group">
+              <label>最高学历</label>
+              <select name="highest_education">
+                <option value="">请选择</option>
+                <option>博士</option><option>硕士</option><option>本科</option><option>大专</option><option>高中及以下</option><option>其他</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>专业</label>
+              <input type="text" name="major">
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label>毕业国家</label>
+              <input type="text" name="grad_country">
+            </div>
+            <div class="form-group">
+              <label>毕业学校</label>
+              <input type="text" name="grad_school">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>毕业时间</label>
+            <input type="date" name="grad_date">
+          </div>
+        </div>
+      </details>
+
+      <!-- 职业背景 -->
+      <details>
+        <summary>职业背景</summary>
+        <div class="details-content">
+          <div class="row">
+            <div class="form-group">
+              <label>目前职业身份</label>
+              <select name="occupation_status">
+                <option value="">请选择</option>
+                <option>企业主</option><option>公司职员</option><option>自由职业者</option><option>学生</option><option>无业</option><option>退休</option><option>其他</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>当前职业 / 职位</label>
+              <input type="text" name="current_job_title" placeholder="例如：税务经理（财务），质量总监（生产）">
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label>总工作年限</label>
+              <input type="text" name="total_work_years">
+            </div>
+            <div class="form-group">
+              <label>是否有管理经验</label>
+              <select name="has_management_exp">
+                <option value="">请选择</option>
+                <option>是</option><option>否</option><option>其他</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label>工作所在国家</label>
+              <input type="text" name="work_countries" placeholder="多个国家请用逗号隔开">
+            </div>
+            <div class="form-group">
+              <label>是否与所学专业相关</label>
+              <select name="major_related">
+                <option value="">请选择</option>
+                <option>是</option><option>否</option><option>其他</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <!-- 语言能力 -->
+      <details>
+        <summary>语言能力</summary>
+        <div class="details-content">
+          <div class="form-group">
+            <label>具备何种外语能力（多选）</label>
+            <div class="checkbox-group" id="langGroup">
+              <label><input type="checkbox" value="英语"> 英语</label>
+              <label><input type="checkbox" value="日语"> 日语</label>
+              <label><input type="checkbox" value="法语"> 法语</label>
+              <label><input type="checkbox" value="德语"> 德语</label>
+              <label><input type="checkbox" value="西班牙语"> 西班牙语</label>
+              <label><input type="checkbox" value="无"> 无</label>
+              <label><input type="checkbox" value="其他"> 其他</label>
+            </div>
+            <input type="hidden" name="languages" id="languagesInput">
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label>IELTS 成绩</label>
+              <input type="text" name="ielts_score" placeholder="未参加可跳过">
+            </div>
+            <div class="form-group">
+              <label>PTE 成绩</label>
+              <input type="text" name="pte_score" placeholder="未参加可跳过">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>其它英语考试成绩</label>
+            <input type="text" name="other_english_score">
+          </div>
+        </div>
+      </details>
+
+      <!-- 职业评估与证书 -->
+      <details>
+        <summary>职业评估与证书</summary>
+        <div class="details-content">
+          <div class="row">
+            <div class="form-group">
+              <label>是否做过职业评估</label>
+              <select name="skills_assessed">
+                <option value="">请选择</option>
+                <option>是</option><option>否</option><option>其他</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>是否持有相关职业证书 / licence</label>
+              <select name="has_licence">
+                <option value="">请选择</option>
+                <option>是</option><option>否</option><option>其他</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>持有哪些相关职业证书 / licence</label>
+            <input type="text" name="licence_details" placeholder="若无可跳过">
+          </div>
+        </div>
+      </details>
+
+      <!-- 配偶信息 -->
+      <details>
+        <summary>配偶 / 伴侣信息</summary>
+        <div class="details-content">
+          <div class="row">
+            <div class="form-group">
+              <label>是否有配偶 / 伴侣</label>
+              <select name="has_spouse">
+                <option value="">请选择</option>
+                <option>是</option><option>否</option><option>其他</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>配偶/伴侣最高学历</label>
+              <select name="spouse_education">
+                <option value="">请选择</option>
+                <option>博士</option><option>硕士</option><option>本科</option><option>大专</option><option>高中及以下</option><option>其他</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label>配偶/伴侣职业身份</label>
+              <select name="spouse_occupation_status">
+                <option value="">请选择</option>
+                <option>企业主</option><option>公司职员</option><option>自由职业者</option><option>学生</option><option>无业</option><option>退休</option><option>其他</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>配偶工作年限</label>
+              <input type="text" name="spouse_work_years">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>配偶英语成绩</label>
+            <input type="text" name="spouse_english_score">
+          </div>
+        </div>
+      </details>
+
+      <!-- 移民意向 -->
+      <details>
+        <summary>移民意向</summary>
+        <div class="details-content">
+          <div class="row">
+            <div class="form-group">
+              <label>想申请移民的国家（多选）</label>
+              <div class="checkbox-group" id="countryGroup">
+                <label><input type="checkbox" value="澳大利亚"> 澳大利亚</label>
+                <label><input type="checkbox" value="新西兰"> 新西兰</label>
+                <label><input type="checkbox" value="新加坡"> 新加坡</label>
+                <label><input type="checkbox" value="其他"> 其他</label>
+              </div>
+              <input type="hidden" name="target_country" id="targetCountryInput">
+            </div>
+            <div class="form-group">
+              <label>是否愿意去偏远地区</label>
+              <select name="willing_regional">
+                <option value="">请选择</option>
+                <option>是</option><option>否</option><option>其他</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label>澳洲雇主担保移民意向确认</label>
+              <select name="immigration_intent">
+                <option value="">请选择</option>
+                <option>有</option><option>暂无计划</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>申请主要原因（多选）</label>
+              <div class="checkbox-group" id="reasonGroup">
+                <label><input type="checkbox" value="子女教育"> 子女教育</label>
+                <label><input type="checkbox" value="就业/事业发展"> 就业/事业发展</label>
+                <label><input type="checkbox" value="环境改善"> 环境改善</label>
+                <label><input type="checkbox" value="养老"> 养老</label>
+                <label><input type="checkbox" value="资产规划"> 资产规划</label>
+                <label><input type="checkbox" value="家人团聚"> 家人团聚</label>
+                <label><input type="checkbox" value="其他"> 其他</label>
+              </div>
+              <input type="hidden" name="immigration_reason" id="reasonInput">
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <!-- 联系方式 -->
+      <div class="row">
+        <div class="form-group">
+          <label>手机 *</label>
+          <input type="text" name="phone" required>
+        </div>
+        <div class="form-group">
+          <label>邮箱 *</label>
+          <input type="email" name="email" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>微信号</label>
+        <input type="text" name="wechat">
+      </div>
+
+      <div class="form-group">
+        <label>其他希望说明的个人情况或特殊需求</label>
+        <textarea name="additional_notes"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>简历链接（如有上传至网盘可贴链接）</label>
+        <input type="text" name="resume_url" placeholder="https://...">
+        <p class="note">文件上传功能后续可接入 Supabase Storage，当前版本请先用网盘链接</p>
+      </div>
+
+      <button type="submit" id="submitBtn">提交评估申请</button>
+      <p style="text-align:center;margin-top:12px;font-size:.8rem;color:#888">提交即授权收集填写信息，信息将严格保密</p>
+    </form>
+
+    <!-- 查询区域 -->
+    <div class="query-section">
+      <h2>已提交记录查询（管理后台）</h2>
+      <button onclick="loadRecords()" style="padding:8px 16px;background:#1e3a5f;color:#fff;border:none;border-radius:6px;cursor:pointer;margin-bottom:15px">刷新数据</button>
+      <div id="recordsTable">
+        <p class="empty">点击"刷新数据"查看已提交的评估记录</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2024 Sunwood Consulting Group. All rights reserved.</p>
+    <p style="margin-top:4px">📞 (03) 9819 1111 | 🌐 sunwoods.com.au</p>
+  </footer>
+
+  <script>
+    // ===== 配置区：已自动填入你的信息 =====
+    const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // 多选框收集
+    function collectCheckbox(groupId, inputId) {
+      const boxes = document.querySelectorAll(`#${groupId} input:checked`);
+      document.getElementById(inputId).value = Array.from(boxes).map(b => b.value).join(', ');
+    }
+
+    document.getElementById('langGroup').addEventListener('change', () => collectCheckbox('langGroup', 'languagesInput'));
+    document.getElementById('countryGroup').addEventListener('change', () => collectCheckbox('countryGroup', 'targetCountryInput'));
+    document.getElementById('reasonGroup').addEventListener('change', () => collectCheckbox('reasonGroup', 'reasonInput'));
+
+    // 提交表单
+    document.getElementById('assessmentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = '提交中...';
+
+      // 确保多选值已收集
+      collectCheckbox('langGroup', 'languagesInput');
+      collectCheckbox('countryGroup', 'targetCountryInput');
+      collectCheckbox('reasonGroup', 'reasonInput');
+
+      const formData = new FormData(e.target);
+      const data = {};
+      formData.forEach((v, k) => { if(v) data[k] = v; });
+
+      const { error } = await supabase.from('candidate_assessments').insert([data]);
+
+      const msg = document.getElementById('msg');
+      msg.style.display = 'block';
+      if (error) {
+        msg.className = 'message error';
+        msg.textContent = '提交失败：' + error.message;
+        console.error(error);
+      } else {
+        msg.className = 'message success';
+        msg.textContent = '提交成功！我们的移民专家将在3个工作日内与您联系。';
+        e.target.reset();
+        loadRecords();
+      }
+
+      btn.disabled = false;
+      btn.textContent = '提交评估申请';
+    });
+
+    // 查询记录
+    async function loadRecords() {
+      const container = document.getElementById('recordsTable');
+      container.innerHTML = '<p class="empty">加载中...</p>';
+
+      const { data, error } = await supabase
+        .from('candidate_assessments')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) {
+        container.innerHTML = '<p class="empty" style="color:#991b1b">加载失败：' + error.message + '</p>';
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        container.innerHTML = '<p class="empty">暂无记录</p>';
+        return;
+      }
+
+      let html = '<div style="overflow-x:auto"><table><thead><tr>' +
+        '<th>提交时间</th><th>姓名</th><th>手机</th><th>邮箱</th><th>当前职业</th><th>目标国家</th>' +
+        '</tr></thead><tbody>';
+      data.forEach(r => {
+        html += '<tr>' +
+          '<td>' + new Date(r.created_at).toLocaleString('zh-CN') + '</td>' +
+          '<td>' + (r.name_cn || '-') + '</td>' +
+          '<td>' + (r.phone || '-') + '</td>' +
+          '<td>' + (r.email || '-') + '</td>' +
+          '<td>' + (r.current_job_title || '-') + '</td>' +
+          '<td>' + (r.target_country || '-') + '</td>' +
+          '</tr>';
+      });
+      html += '</tbody></table></div>';
+      container.innerHTML = html;
+    }
+  </script>
+</body>
 </html>
