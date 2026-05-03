@@ -45,6 +45,41 @@
     .note{font-size:.8rem;color:#888;margin-top:4px}
     footer{text-align:center;padding:30px;color:#999;font-size:.8rem}
     .req{color:#dc2626;margin-left:2px}
+    .file-upload {
+      border: 2px dashed #cbd5e1;
+      border-radius: 10px;
+      padding: 25px;
+      text-align: center;
+      transition: all .2s;
+      background: #f8fafc;
+      cursor: pointer;
+    }
+    .file-upload:hover {
+      border-color: #2d5a87;
+      background: #f1f5f9;
+    }
+    .file-upload.dragover {
+      border-color: #2d5a87;
+      background: #e0f2fe;
+    }
+    .file-btn {
+      display: inline-block;
+      padding: 8px 18px;
+      background: #1e3a5f;
+      color: #fff;
+      border-radius: 6px;
+      font-size: .9rem;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .file-btn:hover {
+      opacity: .9;
+    }
+    .file-hint {
+      font-size: .8rem;
+      color: #888;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
@@ -368,9 +403,12 @@
 
       <div class="form-group">
         <label>上传简历（PDF/Word，10MB以内）</label>
-        <input type="file" id="resumeFile" accept=".pdf,.doc,.docx">
+        <div class="file-upload" id="dropZone">
+          <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" hidden>
+          <label for="resumeFile" class="file-btn">📎 点击选择文件</label>
+          <p class="file-hint" id="uploadStatus">或将文件拖放到此处</p>
+        </div>
         <input type="hidden" name="resume_url" id="resumeUrlInput">
-        <p class="note" id="uploadStatus">未选择文件</p>
       </div>
 
       <button type="submit" id="submitBtn">提交评估申请</button>
@@ -400,17 +438,42 @@
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: { persistSession: false, autoRefreshToken: false }
     });
+    
     let currentFile = null;
+    const dropZone = document.getElementById('dropZone');
+    const status = document.getElementById('uploadStatus');
+
+    function handleFile(file) {
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) {
+        status.innerHTML = '<span style="color:#dc2626">❌ 文件超过10MB限制，请重新选择</span>';
+        currentFile = null;
+        document.getElementById('resumeFile').value = '';
+      } else {
+        const size = (file.size / 1024 / 1024).toFixed(2);
+        status.innerHTML = '✅ 已选择：<b>' + file.name + '</b>（' + size + ' MB）';
+        currentFile = file;
+      }
+    }
+
     document.getElementById('resumeFile').addEventListener('change', (e) => {
-      currentFile = e.target.files[0];
-      const status = document.getElementById('uploadStatus');
-      if (currentFile) {
-        if (currentFile.size > 10 * 1024 * 1024) {
-          status.textContent = '文件超过10MB限制';
-          currentFile = null; e.target.value = '';
-        } else {
-          status.textContent = '已选择: ' + currentFile.name;
-        }
+      handleFile(e.target.files[0]);
+    });
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) {
+        handleFile(e.dataTransfer.files[0]);
       }
     });
 
