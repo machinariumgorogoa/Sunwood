@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>客户管理 - Sunwood CRM</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
+    .container{max-width:1100px;margin:0 auto;padding:40px 20px}
+    .page-header{text-align:center;padding:70px 20px 50px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border-radius:0 0 20px 20px;margin-bottom:30px}
+    .page-header h1{font-size:1.8rem;font-weight:600;margin-bottom:8px;letter-spacing:1px}
+    .page-header p{opacity:.9;font-size:.95rem}
+    .page-icon{width:56px;height:56px;color:#fff;margin-bottom:16px}
+    .card{background:#fff;padding:28px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:20px}
+    .card h2{color:#1e3a5f;font-size:1.2rem;margin-bottom:12px}
+    .card h3{color:#1e3a5f;font-size:1.05rem;margin-bottom:8px}
+    .card p{color:#555;font-size:.9rem}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:20px}
+    .btn{display:inline-block;padding:12px 24px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border:none;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;text-decoration:none;transition:opacity .2s}
+    .btn:hover{opacity:.9}
+    .placeholder{background:#f8fafc;border:2px dashed #e5e7eb;border-radius:8px;padding:50px 20px;text-align:center;color:#888;margin-top:20px}
+    footer{text-align:center;padding:30px;color:#999;font-size:.8rem;background:#fff;margin-top:40px}
+  </style>
+</head>
+<body>
+  <script src="nav.js"></script>
+
+  <section class="page-header">
+    <div class="container">
+      <svg class="page-icon" viewBox="0 0 24 24"><use href="#icon-client"></use></svg>
+      <h1>客户管理</h1>
+      <p>Candidate & Client Management</p>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="card">
+      <h2>功能概述</h2>
+      <p>管理候选人/移民客户信息、评估记录与跟进状态。</p>
+      
+    </div>
+
+    <div class="card">
+      <h2>模块功能</h2>
+      <div class="cards">
+
+        <div class="card">
+          <h3>客户列表</h3>
+          <p>查看所有候选人及客户档案</p>
+        </div>
+        <div class="card">
+          <h3>评估记录</h3>
+          <p>关联 assessment.html 的在线评估数据</p>
+        </div>
+        <div class="card">
+          <h3>跟进状态</h3>
+          <p>记录每次沟通与下一步动作</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>数据区域</h2>
+      <p>连接数据库后，此处将展示真实数据列表、搜索筛选与操作按钮。当前为前端框架占位。</p>
+      <div class="placeholder">数据表格 / 看板 / 操作区（待接入后端）</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>(c) 2026 Sunwood Consulting Group. All rights reserved.</p>
+    <p style="margin-top:4px">(03) 9819 1111 | info@sunwoods.com.au | sunwoods.com.au</p>
+  </footer>
+</body>
+</html>

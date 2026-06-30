@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>雇主公司信息登记表 - Sunwood Consulting</title>
+  <script src="supabase.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
+    .container{max-width:800px;margin:0 auto;padding:20px}
+    header{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border-radius:0 0 20px 20px;margin-bottom:30px}
+    header h1{font-size:1.8rem;font-weight:600;margin-bottom:8px;letter-spacing:1px}
+    header p{opacity:.9;font-size:.95rem}
+    .intro{background:#fff;padding:25px;border-radius:12px;margin-bottom:25px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .intro h2{color:#1e3a5f;font-size:1.2rem;margin-bottom:12px}
+    .intro ul{margin-left:20px;color:#555}
+    .intro li{margin-bottom:6px}
+    form{background:#fff;padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .form-group{margin-bottom:18px}
+    label{display:block;font-weight:600;color:#444;margin-bottom:6px;font-size:.9rem}
+    input[type="text"],input[type="email"],input[type="date"],input[type="number"],input[type="url"],select,textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:.9rem;transition:border .2s}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:#2d5a87}
+    textarea{min-height:80px;resize:vertical}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    @media(max-width:600px){.row{grid-template-columns:1fr}}
+    .radio-group{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+    .radio-group label{font-weight:400;display:flex;align-items:center;gap:4px;cursor:pointer;font-size:.9rem;color:#555}
+    .checkbox-group{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+    .checkbox-group label{font-weight:400;display:flex;align-items:center;gap:4px;cursor:pointer;font-size:.9rem;color:#555}
+    .section-title{font-size:1.05rem;font-weight:700;color:#1e3a5f;margin:25px 0 15px;padding-bottom:8px;border-bottom:2px solid #e5e7eb}
+    button[type="submit"]{width:100%;padding:14px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s;margin-top:10px}
+    button[type="submit"]:hover{opacity:.9}
+    button[type="submit"]:disabled{opacity:.5;cursor:not-allowed}
+    .message{padding:12px 15px;border-radius:8px;margin-bottom:20px;display:none;font-size:.9rem}
+    .message.success{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+    .message.error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+    .note{font-size:.8rem;color:#888;margin-top:4px}
+    .req{color:#dc2626;margin-left:2px}
+    footer{text-align:center;padding:30px;color:#999;font-size:.8rem}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SUNWOOD CONSULTING</h1>
+    <p>Future Management Consulting · Migration and Recruitment Service</p>
+    <p style="margin-top:8px;font-size:.85rem">"Bridging Talent & Employers for Australian Dream"</p>
+  </header>
+
+  <div class="container">
+    <div class="intro">
+      <h2>雇主公司信息登记表</h2>
+      <p style="margin-bottom:12px;color:#555">欢迎与 Sunwood 合作！请填写贵公司信息，帮助我们精准匹配优质人才</p>
+      <ul>
+        <li>Sunwood 专注雇主担保移民，同时拥有专业猎头团队，为澳洲企业输送全球人才</li>
+        <li>无论您是需要招聘海外技术人才，还是为现有员工办理担保移民，我们都能提供一站式服务</li>
+        <li>澳洲持牌移民律师 + 资深猎头顾问联合评估，确保合规高效</li>
+        <li>所有信息严格保密，商务顾问将在2个工作日内与您联系</li>
+      </ul>
+    </div>
+
+    <div id="msg" class="message"></div>
+
+    <form id="companyForm">
+      <!-- 公司基本信息 -->
+      <div class="section-title">公司基本信息</div>
+      <div class="row">
+        <div class="form-group">
+          <label>公司英文注册名称<span class="req">*</span></label>
+          <input type="text" name="company_name_en" placeholder="例如：ABC Pty Ltd" required>
+        </div>
+        <div class="form-group">
+          <label>公司中文名称（如有）</label>
+          <input type="text" name="company_name_cn" placeholder="例如：澳大利亚ABC有限公司">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>ABN / ACN<span class="req">*</span></label>
+          <input type="text" name="abn_acn" placeholder="11位ABN或9位ACN" required>
+          <p class="note">ABN: 11位数字，ACN: 9位数字</p>
+        </div>
+        <div class="form-group">
+          <label>公司成立时间</label>
+          <input type="date" name="establishment_date">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>行业类型<span class="req">*</span></label>
+          <select name="industry" required>
+            <option value="">请选择</option>
+            <option>信息技术 / IT</option>
+            <option>建筑工程 / Construction</option>
+            <option>医疗健康 / Healthcare</option>
+            <option>教育 / Education</option>
+            <option>金融 / Finance</option>
+            <option>制造 / Manufacturing</option>
+            <option>酒店餐饮 / Hospitality</option>
+            <option>零售 / Retail</option>
+            <option>农业 / Agriculture</option>
+            <option>物流 / Logistics</option>
+            <option>专业服务 / Professional Services</option>
+            <option>其他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>公司规模（员工人数）<span class="req">*</span></label>
+          <select name="company_size" required>
+            <option value="">请选择</option>
+            <option>1-10人</option>
+            <option>11-50人</option>
+            <option>51-100人</option>
+            <option>101-200人</option>
+            <option>201-500人</option>
+            <option>500人以上</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>公司网站</label>
+          <input type="url" name="website" placeholder="https://www.example.com.au">
+        </div>
+        <div class="form-group">
+          <label>公司LinkedIn页面</label>
+          <input type="url" name="linkedin" placeholder="https://linkedin.com/company/...">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>公司注册地址<span class="req">*</span></label>
+        <input type="text" name="registered_address" placeholder="完整街道地址" required>
+      </div>
+      <div class="form-group">
+        <label>办公地址（如与注册地址不同）</label>
+        <input type="text" name="office_address" placeholder="完整街道地址">
+      </div>
+
+      <!-- 联系人信息 -->
+      <div class="section-title">主要联系人信息</div>
+      <div class="row">
+        <div class="form-group">
+          <label>联系人姓名<span class="req">*</span></label>
+          <input type="text" name="contact_name" required>
+        </div>
+        <div class="form-group">
+          <label>联系人职位<span class="req">*</span></label>
+          <input type="text" name="contact_title" placeholder="例如：HR Manager / Director" required>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>联系电话<span class="req">*</span></label>
+          <input type="text" name="contact_phone" placeholder="例如：(03) 9819 1111" required>
+        </div>
+        <div class="form-group">
+          <label>联系邮箱<span class="req">*</span></label>
+          <input type="email" name="contact_email" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>微信号（方便中文沟通）</label>
+        <input type="text" name="contact_wechat">
+      </div>
+
+      <!-- 招聘/担保需求 -->
+      <div class="section-title">招聘与担保需求</div>
+      <div class="row">
+        <div class="form-group">
+          <label>您目前的需求类型<span class="req">*</span></label>
+          <select name="requirement_type" required>
+            <option value="">请选择</option>
+            <option>招聘海外人才（需办理雇主担保）</option>
+            <option>为现有员工办理雇主担保移民</option>
+            <option>两者都需要</option>
+            <option>先了解政策，暂无具体需求</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>预计招聘人数</label>
+          <select name="hire_count">
+            <option value="">请选择</option>
+            <option>1人</option>
+            <option>2-5人</option>
+            <option>6-10人</option>
+            <option>10人以上</option>
+            <option>待定</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>招聘/担保职位<span class="req">*</span></label>
+        <input type="text" name="job_positions" placeholder="可填写多个职位，例如：Software Engineer, Accountant, Chef" required>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>工作地点<span class="req">*</span></label>
+          <select name="work_location" required>
+            <option value="">请选择</option>
+            <option>悉尼 NSW</option>
+            <option>墨尔本 VIC</option>
+            <option>布里斯班 QLD</option>
+            <option>珀斯 WA</option>
+            <option>阿德莱德 SA</option>
+            <option>堪培拉 ACT</option>
+            <option>达尔文 NT</option>
+            <option>霍巴特 TAS</option>
+            <option>多个地点</option>
+            <option>其他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>是否接受偏远地区（可获政策优惠）<span class="req">*</span></label>
+          <select name="accept_regional" required>
+            <option value="">请选择</option>
+            <option>是</option>
+            <option>否</option>
+            <option>视情况而定</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>薪资范围（AUD/年）<span class="req">*</span></label>
+          <select name="salary_range" required>
+            <option value="">请选择</option>
+            <option>$65,000 - $75,000</option>
+            <option>$75,000 - $90,000</option>
+            <option>$90,000 - $110,000</option>
+            <option>$110,000 - $130,000</option>
+            <option>$130,000 - $150,000</option>
+            <option>$150,000 以上</option>
+            <option>面议</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>目标签证类型<span class="req">*</span></label>
+          <select name="target_visa" required>
+            <option value="">请选择</option>
+            <option>482 临时技能短缺签证</option>
+            <option>186 雇主担保永居签证</option>
+            <option>494 偏远地区雇主担保</option>
+            <option>187 偏远地区永居（旧政策）</option>
+            <option>DAMA 地区移民协议</option>
+            <option>不确定，需要咨询</option>
+          </select>
+          <p class="note">Sunwood 顾问可协助评估最合适的签证路径</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>所需技能/资质要求</label>
+        <textarea name="skill_requirements" placeholder="请列出对候选人的学历、工作经验、专业证书、英语要求等"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>职位详细描述</label>
+        <textarea name="job_description" placeholder="请描述职位职责、汇报关系、团队规模、工作条件等"></textarea>
+      </div>
+
+      <!-- 公司担保资质 -->
+      <div class="section-title">公司担保资质</div>
+      <div class="row">
+        <div class="form-group">
+          <label>是否已在移民局注册担保资格（Sponsorship）<span class="req">*</span></label>
+          <select name="has_sponsorship" required>
+            <option value="">请选择</option>
+            <option>是，已注册Standard Business Sponsorship</option>
+            <option>是，已注册Accredited Sponsorship</option>
+            <option>否，尚未注册</option>
+            <option>不确定</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>年营业额（AUD）<span class="req">*</span></label>
+          <select name="annual_turnover" required>
+            <option value="">请选择</option>
+            <option>低于 $100万</option>
+            <option>$100万 - $500万</option>
+            <option>$500万 - $1,000万</option>
+            <option>$1,000万 - $5,000万</option>
+            <option>$5,000万以上</option>
+            <option>不方便透露</option>
+          </select>
+          <p class="note">部分签证类别对营业额有要求</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>过往是否有担保过海外员工<span class="req">*</span></label>
+          <select name="previous_sponsorship" required>
+            <option value="">请选择</option>
+            <option>是，有成功担保经验</option>
+            <option>是，但过程中遇到过问题</option>
+            <option>否，这是第一次</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>公司是否为偏远地区企业</label>
+          <select name="is_regional_company">
+            <option value="">请选择</option>
+            <option>是</option>
+            <option>否</option>
+            <option>不确定</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>是否已准备好劳动合同模板</label>
+        <select name="has_contract_template">
+          <option value="">请选择</option>
+          <option>是，已有符合担保要求的合同</option>
+          <option>有，但需要审核更新</option>
+          <option>否，需要协助制定</option>
+        </select>
+      </div>
+
+      <!-- 其他信息 -->
+      <div class="section-title">其他信息</div>
+      <div class="form-group">
+        <label>希望 Sunwood 提供哪些服务（可多选）</label>
+        <div class="checkbox-group" id="serviceGroup">
+          <label><input type="checkbox" value="人才招聘"> 人才招聘（猎头服务）</label>
+          <label><input type="checkbox" value="担保资格申请"> 担保资格申请（Sponsorship）</label>
+          <label><input type="checkbox" value="提名申请"> 提名申请（Nomination）</label>
+          <label><input type="checkbox" value="签证申请"> 签证申请（Visa Application）</label>
+          <label><input type="checkbox" value="合规咨询"> 雇主担保合规咨询</label>
+          <label><input type="checkbox" value="培训"> 员工培训与上岗支持</label>
+          <label><input type="checkbox" value="其他"> 其他</label>
+        </div>
+        <input type="hidden" name="services_needed" id="servicesInput">
+      </div>
+
+      <div class="form-group">
+        <label>预计用人时间</label>
+        <select name="timeline">
+          <option value="">请选择</option>
+          <option>1个月内</option>
+          <option>1-3个月</option>
+          <option>3-6个月</option>
+          <option>6-12个月</option>
+          <option>1年以上</option>
+          <option>灵活</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>其他补充说明或特殊需求</label>
+        <textarea name="additional_notes" placeholder="例如：公司目前的招聘难点、对候选人的特殊要求、已有的面试流程等"></textarea>
+      </div>
+
+      <button type="submit" id="submitBtn">提交公司信息</button>
+      <p style="text-align:center;margin-top:12px;font-size:.8rem;color:#888">提交即授权收集填写信息，信息将严格保密，仅用于人才匹配与移民评估</p>
+    </form>
+  </div>
+
+  <footer>
+    <p>© 2026 Sunwood Consulting Group. All rights reserved.</p>
+    <p style="margin-top:4px">(03) 9819 1111 | sunwoods.com.au</p>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+
+    // 收集多选框值
+    function collectCheckbox(groupId, inputId) {
+      const boxes = document.querySelectorAll('#' + groupId + ' input:checked');
+      document.getElementById(inputId).value = Array.from(boxes).map(b => b.value).join(', ');
+    }
+    document.getElementById('serviceGroup').addEventListener('change', function() {
+      collectCheckbox('serviceGroup', 'servicesInput');
+    });
+
+    function showMsg(text, type) {
+      const msg = document.getElementById('msg');
+      msg.style.display = 'block';
+      msg.className = 'message ' + type;
+      msg.textContent = text;
+      msg.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    document.getElementById('companyForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = '提交中...';
+
+      collectCheckbox('serviceGroup', 'servicesInput');
+
+      const formData = new FormData(e.target);
+      const data = {};
+      formData.forEach(function(v, k) { if(v) data[k] = v; });
+
+      const { error } = await supabaseClient.from('companies').insert([data]);
+
+      if (error) {
+        console.error(error);
+        showMsg('提交失败：' + error.message, 'error');
+      } else {
+        showMsg('提交成功！Sunwood 商务顾问将在2个工作日内与您联系。', 'success');
+        e.target.reset();
+      }
+
+      btn.disabled = false;
+      btn.textContent = '提交公司信息';
+    });
+  </script>
+</body>
+</html>

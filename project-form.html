@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>项目信息登记 - Sunwood Consulting</title>
+  <script src="supabase.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
+    .container{max-width:800px;margin:0 auto;padding:20px}
+    header{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border-radius:0 0 20px 20px;margin-bottom:30px}
+    header h1{font-size:1.8rem;font-weight:600;margin-bottom:8px;letter-spacing:1px}
+    header p{opacity:.9;font-size:.95rem}
+    .intro{background:#fff;padding:25px;border-radius:12px;margin-bottom:25px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .intro h2{color:#1e3a5f;font-size:1.2rem;margin-bottom:12px}
+    .intro ul{margin-left:20px;color:#555}
+    .intro li{margin-bottom:6px}
+    form{background:#fff;padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .form-group{margin-bottom:18px}
+    label{display:block;font-weight:600;color:#444;margin-bottom:6px;font-size:.9rem}
+    input[type="text"],input[type="email"],input[type="tel"],input[type="date"],input[type="number"],select,textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:.9rem;transition:border .2s}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:#2d5a87}
+    textarea{min-height:80px;resize:vertical}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    @media(max-width:600px){.row{grid-template-columns:1fr}}
+    .checkbox-group{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+    .checkbox-group label{font-weight:400;display:flex;align-items:center;gap:4px;cursor:pointer;font-size:.9rem;color:#555}
+    .section-title{font-size:1.05rem;font-weight:700;color:#1e3a5f;margin:25px 0 15px;padding-bottom:8px;border-bottom:2px solid #e5e7eb}
+    .section-title:first-of-type{margin-top:0}
+    button[type="submit"]{width:100%;padding:14px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s;margin-top:10px}
+    button[type="submit"]:hover{opacity:.9}
+    button[type="submit"]:disabled{opacity:.5;cursor:not-allowed}
+    .message{padding:12px 15px;border-radius:8px;margin-bottom:20px;display:none;font-size:.9rem}
+    .message.success{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+    .message.error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+    .note{font-size:.8rem;color:#888;margin-top:4px}
+    footer{text-align:center;padding:30px;color:#999;font-size:.8rem}
+    .req{color:#dc2626;margin-left:2px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SUNWOOD CONSULTING</h1>
+    <p>Future Management Consulting · Migration and Education Service</p>
+    <p style="margin-top:8px;font-size:.85rem">"Getting YOU on the plane to Australia"</p>
+  </header>
+
+  <div class="container">
+    <div class="intro">
+      <h2>项目信息登记表</h2>
+      <p style="margin-bottom:12px;color:#555">记录每个雇主担保 / 猎头项目的完整信息，便于顾问跟进与内部协作</p>
+      <ul>
+        <li>关联客户（候选人）与雇主公司，形成完整项目视图</li>
+        <li>跟踪签证类型、项目状态、优先级与关键时间节点</li>
+        <li>信息仅内部使用，严格保密</li>
+      </ul>
+    </div>
+
+    <div id="msg" class="message"></div>
+
+    <form id="projectForm">
+      <!-- 项目基本信息 -->
+      <div class="section-title">项目基本信息</div>
+      <div class="row">
+        <div class="form-group">
+          <label>项目名称<span class="req">*</span></label>
+          <input type="text" name="project_name" placeholder="例如：张先生 - 482 厨师雇主担保" required>
+        </div>
+        <div class="form-group">
+          <label>项目类型<span class="req">*</span></label>
+          <select name="project_type" required>
+            <option value="">请选择</option>
+            <option>雇主担保移民</option>
+            <option>猎头招聘</option>
+            <option>雇主担保 + 猎头</option>
+            <option>咨询评估</option>
+            <option>其他</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>项目状态<span class="req">*</span></label>
+          <select name="project_status" required>
+            <option value="">请选择</option>
+            <option>初步咨询</option>
+            <option>方案确认</option>
+            <option>材料准备</option>
+            <option>雇主匹配中</option>
+            <option>递交申请</option>
+            <option>等待审理</option>
+            <option>获批</option>
+            <option>暂停</option>
+            <option>关闭</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>优先级</label>
+          <select name="priority">
+            <option value="">请选择</option>
+            <option>高</option>
+            <option>中</option>
+            <option>低</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>负责顾问<span class="req">*</span></label>
+          <input type="text" name="assigned_consultant" placeholder="例如：Alice Zhang" required>
+        </div>
+        <div class="form-group">
+          <label>项目开启日期</label>
+          <input type="date" name="start_date">
+        </div>
+      </div>
+
+      <!-- 客户（候选人）信息 -->
+      <div class="section-title">客户（候选人）信息</div>
+      <div class="row">
+        <div class="form-group">
+          <label>客户姓名<span class="req">*</span></label>
+          <input type="text" name="client_name" required>
+        </div>
+        <div class="form-group">
+          <label>客户手机号<span class="req">*</span></label>
+          <input type="tel" name="client_phone" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>客户邮箱</label>
+        <input type="email" name="client_email">
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>目标签证类型</label>
+          <div class="checkbox-group" id="visaGroup">
+            <label><input type="checkbox" value="482"> 482</label>
+            <label><input type="checkbox" value="186"> 186</label>
+            <label><input type="checkbox" value="494"> 494</label>
+            <label><input type="checkbox" value="其他"> 其他</label>
+            <label><input type="checkbox" value="待定"> 待定</label>
+          </div>
+          <input type="hidden" name="visa_types" id="visaTypesInput">
+        </div>
+        <div class="form-group">
+          <label>提名职业 / 岗位</label>
+          <input type="text" name="occupation" placeholder="例如：Chef (ANZSCO 351311)">
+        </div>
+      </div>
+
+      <!-- 雇主公司信息 -->
+      <div class="section-title">雇主公司信息</div>
+      <div class="row">
+        <div class="form-group">
+          <label>雇主公司名称</label>
+          <input type="text" name="employer_name" placeholder="若已匹配，请填写">
+        </div>
+        <div class="form-group">
+          <label>雇主 ABN</label>
+          <input type="text" name="employer_abn" placeholder="11 位数字" maxlength="14">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>雇主联系人</label>
+          <input type="text" name="employer_contact_name">
+        </div>
+        <div class="form-group">
+          <label>雇主联系电话</label>
+          <input type="tel" name="employer_contact_phone">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>雇主联系邮箱</label>
+        <input type="email" name="employer_contact_email">
+      </div>
+
+      <!-- 项目细节 -->
+      <div class="section-title">项目细节</div>
+      <div class="row">
+        <div class="form-group">
+          <label>年薪 / 薪资包（AUD）</label>
+          <input type="text" name="salary_package" placeholder="例如：75,000 + super">
+        </div>
+        <div class="form-group">
+          <label>预计完成日期</label>
+          <input type="date" name="estimated_completion_date">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>项目背景 / 需求描述</label>
+        <textarea name="project_background" placeholder="请描述客户需求、当前进度、特殊要求等"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>当前障碍 / 风险点</label>
+        <textarea name="risk_notes" placeholder="例如：英语成绩未达标、雇主资质待核实、材料缺失等"></textarea>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>下次跟进日期</label>
+          <input type="date" name="next_follow_up_date">
+        </div>
+        <div class="form-group">
+          <label>下次跟进事项</label>
+          <input type="text" name="next_follow_up_action" placeholder="例如：催客户补交雅思成绩">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>内部备注</label>
+        <textarea name="internal_notes" placeholder="仅供内部团队查看的备注"></textarea>
+      </div>
+
+      <button type="submit" id="submitBtn">提交项目信息</button>
+      <p style="text-align:center;margin-top:12px;font-size:.8rem;color:#888">提交即授权 Sunwood 收集并保密处理上述信息</p>
+    </form>
+  </div>
+
+  <footer>
+    <p>© 2026 Sunwood Consulting Group. All rights reserved.</p>
+    <p style="margin-top:4px">(03) 9819 1111 | sunwoods.com.au</p>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+
+    function collectCheckbox(groupId, inputId) {
+      const boxes = document.querySelectorAll(`#${groupId} input:checked`);
+      document.getElementById(inputId).value = Array.from(boxes).map(b => b.value).join(', ');
+    }
+
+    document.getElementById('visaGroup').addEventListener('change', () => collectCheckbox('visaGroup', 'visaTypesInput'));
+
+    function showMsg(text, type) {
+      const msg = document.getElementById('msg');
+      msg.style.display = 'block';
+      msg.className = 'message ' + type;
+      msg.textContent = text;
+      msg.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function isValidAbn(value) {
+      if (!value) return true;
+      const digits = value.replace(/\s+/g, '');
+      return /^\d{11}$/.test(digits);
+    }
+
+    function isValidEmail(value) {
+      if (!value) return true;
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    }
+
+    document.getElementById('projectForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = '提交中...';
+
+      collectCheckbox('visaGroup', 'visaTypesInput');
+
+      const form = e.target;
+      const employerAbn = form.employer_abn.value;
+      const clientEmail = form.client_email.value;
+      const employerEmail = form.employer_contact_email.value;
+
+      if (!isValidAbn(employerAbn)) {
+        showMsg('雇主 ABN 必须为 11 位数字，请检查格式。', 'error');
+        btn.disabled = false;
+        btn.textContent = '提交项目信息';
+        return;
+      }
+
+      if (!isValidEmail(clientEmail) || !isValidEmail(employerEmail)) {
+        showMsg('邮箱格式不正确，请检查。', 'error');
+        btn.disabled = false;
+        btn.textContent = '提交项目信息';
+        return;
+      }
+
+      const formData = new FormData(form);
+      const data = {};
+      formData.forEach((v, k) => { if (v) data[k] = v; });
+
+      const { error } = await supabaseClient.from('projects').insert([data]);
+
+      if (error) {
+        console.error(error);
+        showMsg('提交失败：' + error.message, 'error');
+      } else {
+        showMsg('提交成功！项目信息已保存。', 'success');
+        form.reset();
+      }
+
+      btn.disabled = false;
+      btn.textContent = '提交项目信息';
+    });
+  </script>
+</body>
+</html>
