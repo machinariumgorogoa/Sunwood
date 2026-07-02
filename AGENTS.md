@@ -96,8 +96,10 @@ Sunwood/
 
 ### 当前优先（老板反馈修改）
 
-- 等待并整理 Sunwood 老板对已上线页面的修改意见
-- 制定修改计划并实施
+- ✅ 已整理老板对 `assessment.html` 免费评估表的反馈
+- ✅ 已修改 `assessment.html`：标题/文案、服务类型、语言成绩单项、职业评估、签证类别、多文件上传、低龄留学选项
+- ✅ 已创建数据库迁移脚本 `migrations/2026-06-29-assessment-feedback.sql`
+- ⏳ 等待在 Supabase SQL Editor 执行迁移脚本后验证生产环境
 
 ### 下一阶段（用户系统）
 
