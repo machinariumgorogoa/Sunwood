@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>澳洲雇主担保移民评估 - Sunwood Consulting</title>
+  <title>澳洲移民评估 - Sunwood Consulting</title>
   <script src="supabase.min.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
@@ -48,7 +48,7 @@
     .file-upload {
       border: 2px dashed #cbd5e1;
       border-radius: 10px;
-      padding: 25px;
+      padding: 20px;
       text-align: center;
       transition: all .2s;
       background: #f8fafc;
@@ -80,6 +80,32 @@
       color: #888;
       margin-top: 8px;
     }
+    .score-row .form-group { margin-bottom: 0; }
+    .score-row label.sub-label {
+      font-size: .8rem;
+      color: #666;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .visa-group { flex-direction: column; gap: 8px; }
+    .visa-group .visa-section-title {
+      width: 100%;
+      font-weight: 600;
+      color: #1e3a5f;
+      margin-top: 12px;
+      margin-bottom: 4px;
+      font-size: .85rem;
+    }
+    .visa-group .visa-section-title:first-child { margin-top: 0; }
+    .visa-group label { width: 48%; }
+    @media(max-width:600px){.visa-group label{width:100%}}
+    .upload-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    @media(max-width:600px){.upload-grid{grid-template-columns:1fr}}
+    .upload-item label { font-size: .85rem; }
   </style>
 </head>
 <body>
@@ -91,12 +117,12 @@
 
   <div class="container">
     <div class="intro">
-      <h2>雇主担保移民评估表</h2>
-      <p style="margin-bottom:12px;color:#555">想通过雇主担保圆梦澳洲？您的职业技能与澳洲机遇之间，只差这一步</p>
+      <h2>澳洲移民评估表</h2>
+      <p style="margin-bottom:12px;color:#555">规划您的澳洲未来，从技术移民到留学教育，我们为您匹配最优路径</p>
       <ul>
-        <li>这是技术人才快速获得澳洲永居的理想途径，无需打分竞争</li>
-        <li>直接对接澳洲本地雇主需求，职业发展与身份规划一步到位</li>
-        <li>澳洲持牌移民律师精准评估，匹配最适合的雇主资源</li>
+        <li>覆盖技术移民、雇主担保、留学/游学、家庭团聚、工作签证、续签入籍等全品类澳洲服务</li>
+        <li>直接对接澳洲本地雇主与企业猎聘资源，职业发展与身份规划一步到位</li>
+        <li>提供简历优化、面试技巧培训、持牌移民律师一对一精准评估</li>
         <li>所有信息严格保密，专家将在3个工作日内与您联系</li>
       </ul>
     </div>
@@ -104,6 +130,23 @@
     <div id="msg" class="message"></div>
 
     <form id="assessmentForm">
+      <!-- 服务类型 -->
+      <div class="section-title">您希望咨询的服务类型</div>
+      <div class="form-group">
+        <label>请选择您感兴趣的服务（至少选一项）<span class="req">*</span></label>
+        <div class="checkbox-group" id="serviceTypeGroup">
+          <label><input type="checkbox" value="雇主担保移民"> 雇主担保移民</label>
+          <label><input type="checkbox" value="技术移民"> 技术移民</label>
+          <label><input type="checkbox" value="留学/游学"> 留学/游学</label>
+          <label><input type="checkbox" value="工作/培训签证"> 工作/培训签证</label>
+          <label><input type="checkbox" value="家庭团聚"> 家庭团聚</label>
+          <label><input type="checkbox" value="旅游/临居签证"> 旅游/临居签证</label>
+          <label><input type="checkbox" value="签证续签/入籍"> 签证续签/入籍</label>
+          <label><input type="checkbox" value="其他"> 其他</label>
+        </div>
+        <input type="hidden" name="consult_service_types" id="serviceTypeInput">
+      </div>
+
       <!-- 基础信息 -->
       <div class="section-title">基础信息</div>
       <div class="row">
@@ -198,9 +241,30 @@
           <input type="text" name="grad_school" required>
         </div>
       </div>
+      <div class="row">
+        <div class="form-group">
+          <label>毕业时间<span class="req">*</span></label>
+          <input type="date" name="grad_date" required>
+        </div>
+        <div class="form-group">
+          <label>是否与所学专业相关<span class="req">*</span></label>
+          <select name="major_related" required>
+            <option value="">请选择</option>
+            <option>是</option><option>否</option><option>其他</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 低龄留学/游学意向 -->
       <div class="form-group">
-        <label>毕业时间<span class="req">*</span></label>
-        <input type="date" name="grad_date" required>
+        <label>是否有低龄留学/游学/插班意向</label>
+        <div class="checkbox-group" id="studyTourGroup">
+          <label><input type="checkbox" value="中小学留学"> 中小学留学</label>
+          <label><input type="checkbox" value="短期游学"> 短期游学</label>
+          <label><input type="checkbox" value="插班"> 插班</label>
+          <label><input type="checkbox" value="暂无"> 暂无</label>
+        </div>
+        <input type="hidden" name="study_tour_interest" id="studyTourInput">
       </div>
 
       <!-- 职业背景 -->
@@ -231,18 +295,9 @@
           </select>
         </div>
       </div>
-      <div class="row">
-        <div class="form-group">
-          <label>工作所在国家<span class="req">*</span></label>
-          <input type="text" name="work_countries" placeholder="多个国家请用逗号隔开" required>
-        </div>
-        <div class="form-group">
-          <label>是否与所学专业相关<span class="req">*</span></label>
-          <select name="major_related" required>
-            <option value="">请选择</option>
-            <option>是</option><option>否</option><option>其他</option>
-          </select>
-        </div>
+      <div class="form-group">
+        <label>工作所在国家<span class="req">*</span></label>
+        <input type="text" name="work_countries" placeholder="多个国家请用逗号隔开" required>
       </div>
 
       <!-- 语言能力 -->
@@ -260,31 +315,61 @@
         </div>
         <input type="hidden" name="languages" id="languagesInput">
       </div>
+
+      <div class="form-group">
+        <label>IELTS 单项成绩</label>
+        <div class="row score-row">
+          <div class="form-group"><label class="sub-label">听力</label><input type="number" name="ielts_listening" step="0.5" min="0" max="9" placeholder="0-9"></div>
+          <div class="form-group"><label class="sub-label">口语</label><input type="number" name="ielts_speaking" step="0.5" min="0" max="9" placeholder="0-9"></div>
+          <div class="form-group"><label class="sub-label">阅读</label><input type="number" name="ielts_reading" step="0.5" min="0" max="9" placeholder="0-9"></div>
+          <div class="form-group"><label class="sub-label">写作</label><input type="number" name="ielts_writing" step="0.5" min="0" max="9" placeholder="0-9"></div>
+        </div>
+        <input type="hidden" name="ielts_score" id="ieltsScoreInput">
+      </div>
+
+      <div class="form-group">
+        <label>PTE 单项成绩</label>
+        <div class="row score-row">
+          <div class="form-group"><label class="sub-label">听力</label><input type="number" name="pte_listening" min="0" max="90" placeholder="0-90"></div>
+          <div class="form-group"><label class="sub-label">口语</label><input type="number" name="pte_speaking" min="0" max="90" placeholder="0-90"></div>
+          <div class="form-group"><label class="sub-label">阅读</label><input type="number" name="pte_reading" min="0" max="90" placeholder="0-90"></div>
+          <div class="form-group"><label class="sub-label">写作</label><input type="number" name="pte_writing" min="0" max="90" placeholder="0-90"></div>
+        </div>
+        <input type="hidden" name="pte_score" id="pteScoreInput">
+      </div>
+
       <div class="row">
         <div class="form-group">
-          <label>IELTS 成绩</label>
-          <input type="text" name="ielts_score" placeholder="未参加可跳过">
+          <label>其他英语考试名称</label>
+          <input type="text" name="other_english_name" placeholder="例如：TOEFL、CAE、OET">
         </div>
         <div class="form-group">
-          <label>PTE 成绩</label>
-          <input type="text" name="pte_score" placeholder="未参加可跳过">
+          <label>其他英语考试总分</label>
+          <input type="text" name="other_english_score" placeholder="未参加可跳过">
         </div>
       </div>
       <div class="form-group">
-        <label>其它英语考试成绩</label>
-        <input type="text" name="other_english_score">
+        <label>其他英语考试单项成绩（如有）</label>
+        <input type="text" name="other_english_details" placeholder="例如：听力25 口语23 阅读24 写作22">
       </div>
 
       <!-- 职业评估与证书 -->
       <div class="section-title">职业评估与证书</div>
       <div class="row">
         <div class="form-group">
-          <label>是否做过职业评估<span class="req">*</span></label>
-          <select name="skills_assessed" required>
+          <label>是否已完成职业评估</label>
+          <select name="has_skills_assessment">
             <option value="">请选择</option>
-            <option>是</option><option>否</option><option>其他</option>
+            <option value="true">是</option>
+            <option value="false">否</option>
           </select>
         </div>
+        <div class="form-group">
+          <label>职业评估职位</label>
+          <input type="text" name="skills_assessed_occupation" placeholder="例如：会计、软件工程师（可选）">
+        </div>
+      </div>
+      <div class="row">
         <div class="form-group">
           <label>是否持有相关职业证书 / licence<span class="req">*</span></label>
           <select name="has_licence" required>
@@ -292,10 +377,10 @@
             <option>是</option><option>否</option><option>其他</option>
           </select>
         </div>
-      </div>
-      <div class="form-group">
-        <label>持有哪些相关职业证书 / licence</label>
-        <input type="text" name="licence_details" placeholder="若无可跳过">
+        <div class="form-group">
+          <label>持有哪些相关职业证书 / licence</label>
+          <input type="text" name="licence_details" placeholder="若无可跳过">
+        </div>
       </div>
 
       <!-- 配偶信息 -->
@@ -331,7 +416,7 @@
       </div>
       <div class="form-group">
         <label>配偶英语成绩</label>
-        <input type="text" name="spouse_english_score">
+        <input type="text" name="spouse_english_score" placeholder="可填写总分或单项">
       </div>
 
       <!-- 移民意向 -->
@@ -339,13 +424,12 @@
       <div class="row">
         <div class="form-group">
           <label>想申请移民的国家<span class="req">*</span></label>
-          <div class="checkbox-group" id="countryGroup">
-            <label><input type="checkbox" value="澳大利亚"> 澳大利亚</label>
-            <label><input type="checkbox" value="新西兰"> 新西兰</label>
-            <label><input type="checkbox" value="新加坡"> 新加坡</label>
-            <label><input type="checkbox" value="其他"> 其他</label>
-          </div>
-          <input type="hidden" name="target_country" id="targetCountryInput" required>
+          <select name="target_country" required>
+            <option value="澳大利亚" selected>澳大利亚</option>
+            <option value="新西兰">新西兰</option>
+            <option value="新加坡">新加坡</option>
+            <option value="其他">其他</option>
+          </select>
         </div>
         <div class="form-group">
           <label>是否愿意去偏远地区<span class="req">*</span></label>
@@ -355,9 +439,63 @@
           </select>
         </div>
       </div>
+
+      <div class="form-group">
+        <label>感兴趣的签证类别/服务（至少选一项）<span class="req">*</span></label>
+        <div class="checkbox-group visa-group" id="visaGroup">
+          <div class="visa-section-title">常见业务</div>
+          <label><input type="checkbox" value="482 技能紧缺签证"> 482 技能紧缺签证</label>
+          <label><input type="checkbox" value="186 ENS 雇主担保永居"> 186 ENS 雇主担保永居</label>
+          <label><input type="checkbox" value="494 雇主担保区域临居"> 494 雇主担保区域临居</label>
+          <label><input type="checkbox" value="189 独立技术移民"> 189 独立技术移民</label>
+          <label><input type="checkbox" value="190 州担保技术移民"> 190 州担保技术移民</label>
+          <label><input type="checkbox" value="491 偏远地区技术移民"> 491 偏远地区技术移民</label>
+          <label><input type="checkbox" value="485 毕业生工签"> 485 毕业生工签</label>
+          <label><input type="checkbox" value="500 学生签证"> 500 学生签证</label>
+          <label><input type="checkbox" value="600 旅游签证"> 600 旅游签证</label>
+          <label><input type="checkbox" value="309/100 配偶签证（境外）"> 309/100 配偶签证（境外）</label>
+          <label><input type="checkbox" value="820/801 配偶签证（境内）"> 820/801 配偶签证（境内）</label>
+          <label><input type="checkbox" value="143/864 父母移民"> 143/864 父母移民</label>
+          <label><input type="checkbox" value="103/804 父母排队移民"> 103/804 父母排队移民</label>
+          <label><input type="checkbox" value="870 父母临居担保"> 870 父母临居担保</label>
+          <label><input type="checkbox" value="101/802 子女签证"> 101/802 子女签证</label>
+          <label><input type="checkbox" value="155/157 居民往返签"> 155/157 居民往返签</label>
+
+          <div class="visa-section-title">工作/培训类</div>
+          <label><input type="checkbox" value="407 培训签证"> 407 培训签证</label>
+          <label><input type="checkbox" value="408 临时活动签证"> 408 临时活动签证</label>
+          <label><input type="checkbox" value="400 短期工作签证"> 400 短期工作签证</label>
+          <label><input type="checkbox" value="462/417 打工度假签证"> 462/417 打工度假签证</label>
+
+          <div class="visa-section-title">人才/投资类</div>
+          <label><input type="checkbox" value="NIV 858 国家创新签证"> NIV 858 国家创新签证</label>
+          <label><input type="checkbox" value="188/888 商业创新与投资签证"> 188/888 商业创新与投资签证</label>
+
+          <div class="visa-section-title">其他家庭类</div>
+          <label><input type="checkbox" value="300 准结婚签证"> 300 准结婚签证</label>
+          <label><input type="checkbox" value="102 领养签证"> 102 领养签证</label>
+          <label><input type="checkbox" value="461 新西兰公民家庭关系"> 461 新西兰公民家庭关系</label>
+
+          <div class="visa-section-title">医疗/人道类</div>
+          <label><input type="checkbox" value="602 医疗签证"> 602 医疗签证</label>
+          <label><input type="checkbox" value="866 庇护签证"> 866 庇护签证</label>
+
+          <div class="visa-section-title">上诉/干预类</div>
+          <label><input type="checkbox" value="AAT/FCC 上诉"> AAT/FCC 上诉</label>
+          <label><input type="checkbox" value="部长干预"> 部长干预</label>
+          <label><input type="checkbox" value="签证取消/拒签处理"> 签证取消/拒签处理</label>
+
+          <div class="visa-section-title">入籍/续签</div>
+          <label><input type="checkbox" value="入籍申请（授予）"> 入籍申请（授予）</label>
+          <label><input type="checkbox" value="入籍申请（血统）"> 入籍申请（血统）</label>
+          <label><input type="checkbox" value="155/157 居民往返签续签"> 155/157 居民往返签续签</label>
+        </div>
+        <input type="hidden" name="visa_categories" id="visaCategoriesInput" required>
+      </div>
+
       <div class="row">
         <div class="form-group">
-          <label>澳洲雇主担保移民意向确认<span class="req">*</span></label>
+          <label>澳洲移民意向确认<span class="req">*</span></label>
           <select name="immigration_intent" required>
             <option value="">请选择</option>
             <option>有</option><option>暂无计划</option>
@@ -401,14 +539,46 @@
         <textarea name="additional_notes"></textarea>
       </div>
 
-      <div class="form-group">
-        <label>上传简历（PDF/Word，10MB以内）</label>
-        <div class="file-upload" id="dropZone">
-          <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" hidden>
-          <label for="resumeFile" class="file-btn">点击选择文件</label>
-          <p class="file-hint" id="uploadStatus">或将文件拖放到此处</p>
+      <!-- 资料上传 -->
+      <div class="section-title">资料上传</div>
+      <div class="upload-grid">
+        <div class="form-group upload-item">
+          <label>简历（PDF/Word，10MB以内）</label>
+          <div class="file-upload" id="resumeDropZone">
+            <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" hidden>
+            <label for="resumeFile" class="file-btn">点击选择文件</label>
+            <p class="file-hint" id="resumeStatus">或将文件拖放到此处</p>
+          </div>
+          <input type="hidden" name="resume_url" id="resumeUrlInput">
         </div>
-        <input type="hidden" name="resume_url" id="resumeUrlInput">
+
+        <div class="form-group upload-item">
+          <label>语言成绩单（PDF/图片，10MB以内）</label>
+          <div class="file-upload" id="englishScoreDropZone2">
+            <input type="file" id="englishScoreFile2" accept=".pdf,.jpg,.jpeg,.png" hidden>
+            <label for="englishScoreFile2" class="file-btn">点击选择文件</label>
+            <p class="file-hint" id="englishScoreStatus2">或将文件拖放到此处</p>
+          </div>
+          <input type="hidden" name="english_score_url" id="englishScoreUrlInput">
+        </div>
+
+        <div class="form-group upload-item">
+          <label>学历证明（PDF/图片，10MB以内）</label>
+          <div class="file-upload" id="eduCertDropZone">
+            <input type="file" id="eduCertFile" accept=".pdf,.jpg,.jpeg,.png" hidden>
+            <label for="eduCertFile" class="file-btn">点击选择文件</label>
+            <p class="file-hint" id="eduCertStatus">或将文件拖放到此处</p>
+          </div>
+        </div>
+
+        <div class="form-group upload-item">
+          <label>成绩单（PDF/图片，10MB以内）</label>
+          <div class="file-upload" id="transcriptDropZone">
+            <input type="file" id="transcriptFile" accept=".pdf,.jpg,.jpeg,.png" hidden>
+            <label for="transcriptFile" class="file-btn">点击选择文件</label>
+            <p class="file-hint" id="transcriptStatus">或将文件拖放到此处</p>
+          </div>
+        </div>
       </div>
 
       <button type="submit" id="submitBtn">提交评估申请</button>
@@ -435,48 +605,81 @@
     const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
 
-    // 关键修复1：禁用本地存储，避免浏览器跟踪防护拦截
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: { persistSession: false, autoRefreshToken: false }
     });
-    
-    let currentFile = null;
-    const dropZone = document.getElementById('dropZone');
-    const status = document.getElementById('uploadStatus');
 
-    function handleFile(file) {
-      if (!file) return;
-      if (file.size > 10 * 1024 * 1024) {
-        status.innerHTML = '<span style="color:#dc2626">错误：文件超过10MB限制，请重新选择</span>';
-        currentFile = null;
-        document.getElementById('resumeFile').value = '';
-      } else {
+    // 通用文件上传组件
+    function createUploader(config) {
+      const { zoneId, inputId, statusId, prefix, accept } = config;
+      const zone = document.getElementById(zoneId);
+      const input = document.getElementById(inputId);
+      const status = document.getElementById(statusId);
+      let currentFile = null;
+      let lastUrl = null;
+      const defaultHint = status.textContent;
+
+      function handleFile(file) {
+        if (!file) return;
+        if (file.size > 10 * 1024 * 1024) {
+          status.innerHTML = '<span style="color:#dc2626">错误：文件超过10MB限制</span>';
+          currentFile = null;
+          input.value = '';
+          return;
+        }
         const size = (file.size / 1024 / 1024).toFixed(2);
         status.innerHTML = '已选择：<b>' + file.name + '</b>（' + size + ' MB）';
         currentFile = file;
       }
+
+      input.addEventListener('change', (e) => handleFile(e.target.files[0]));
+      zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dragover'); });
+      zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+      zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+      });
+
+      return {
+        async upload() {
+          if (!currentFile) return null;
+          const fileName = prefix + '_' + Date.now() + '_' + currentFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+          const { error: uploadError } = await supabaseClient
+            .storage.from('resumes').upload(fileName, currentFile, { contentType: currentFile.type });
+          if (uploadError) throw new Error('[' + prefix + '] ' + uploadError.message);
+          const { data: urlData } = supabaseClient.storage.from('resumes').getPublicUrl(fileName);
+          lastUrl = urlData.publicUrl;
+          return lastUrl;
+        },
+        reset() {
+          currentFile = null;
+          lastUrl = null;
+          input.value = '';
+          status.innerHTML = defaultHint;
+        },
+        get lastUrl() { return lastUrl; }
+      };
     }
 
-    document.getElementById('resumeFile').addEventListener('change', (e) => {
-      handleFile(e.target.files[0]);
-    });
-
-    dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropZone.classList.add('dragover');
-    });
-
-    dropZone.addEventListener('dragleave', () => {
-      dropZone.classList.remove('dragover');
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('dragover');
-      if (e.dataTransfer.files.length) {
-        handleFile(e.dataTransfer.files[0]);
-      }
-    });
+    const uploaders = {
+      resume: createUploader({
+        zoneId: 'resumeDropZone', inputId: 'resumeFile', statusId: 'resumeStatus',
+        prefix: 'resume', accept: '.pdf,.doc,.docx'
+      }),
+      englishScore: createUploader({
+        zoneId: 'englishScoreDropZone2', inputId: 'englishScoreFile2', statusId: 'englishScoreStatus2',
+        prefix: 'english', accept: '.pdf,.jpg,.jpeg,.png'
+      }),
+      eduCert: createUploader({
+        zoneId: 'eduCertDropZone', inputId: 'eduCertFile', statusId: 'eduCertStatus',
+        prefix: 'edu', accept: '.pdf,.jpg,.jpeg,.png'
+      }),
+      transcript: createUploader({
+        zoneId: 'transcriptDropZone', inputId: 'transcriptFile', statusId: 'transcriptStatus',
+        prefix: 'transcript', accept: '.pdf,.jpg,.jpeg,.png'
+      })
+    };
 
     function collectCheckbox(groupId, inputId) {
       const boxes = document.querySelectorAll(`#${groupId} input:checked`);
@@ -484,8 +687,52 @@
     }
 
     document.getElementById('langGroup').addEventListener('change', () => collectCheckbox('langGroup', 'languagesInput'));
-    document.getElementById('countryGroup').addEventListener('change', () => collectCheckbox('countryGroup', 'targetCountryInput'));
+    document.getElementById('serviceTypeGroup').addEventListener('change', () => collectCheckbox('serviceTypeGroup', 'serviceTypeInput'));
+    document.getElementById('studyTourGroup').addEventListener('change', () => collectCheckbox('studyTourGroup', 'studyTourInput'));
+    document.getElementById('visaGroup').addEventListener('change', () => collectCheckbox('visaGroup', 'visaCategoriesInput'));
     document.getElementById('reasonGroup').addEventListener('change', () => collectCheckbox('reasonGroup', 'reasonInput'));
+
+    function getScore(name) {
+      const el = document.querySelector(`[name="${name}"]`);
+      if (!el || !el.value) return null;
+      const n = parseFloat(el.value);
+      return isNaN(n) ? el.value : n;
+    }
+
+    function buildLanguageScores() {
+      const scores = {};
+      const ielts = {
+        listening: getScore('ielts_listening'),
+        speaking: getScore('ielts_speaking'),
+        reading: getScore('ielts_reading'),
+        writing: getScore('ielts_writing')
+      };
+      const pte = {
+        listening: getScore('pte_listening'),
+        speaking: getScore('pte_speaking'),
+        reading: getScore('pte_reading'),
+        writing: getScore('pte_writing')
+      };
+      const otherName = document.querySelector('[name="other_english_name"]')?.value;
+      const otherScore = document.querySelector('[name="other_english_score"]')?.value;
+      const otherDetails = document.querySelector('[name="other_english_details"]')?.value;
+
+      if (ielts.listening || ielts.speaking || ielts.reading || ielts.writing) scores.ielts = ielts;
+      if (pte.listening || pte.speaking || pte.reading || pte.writing) scores.pte = pte;
+      if (otherName || otherScore || otherDetails) {
+        scores.other = { name: otherName || null, details: otherDetails || null };
+      }
+
+      // 兼容性：保留原有总分字段
+      const ieltsOverall = [ielts.listening, ielts.speaking, ielts.reading, ielts.writing]
+        .filter(v => v !== null).join(' / ');
+      const pteOverall = [pte.listening, pte.speaking, pte.reading, pte.writing]
+        .filter(v => v !== null).join(' / ');
+      if (ieltsOverall) document.getElementById('ieltsScoreInput').value = ieltsOverall;
+      if (pteOverall) document.getElementById('pteScoreInput').value = pteOverall;
+
+      return Object.keys(scores).length ? scores : null;
+    }
 
     function showMsg(text, type) {
       const msg = document.getElementById('msg');
@@ -501,26 +748,24 @@
       btn.textContent = '提交中...';
 
       collectCheckbox('langGroup', 'languagesInput');
-      collectCheckbox('countryGroup', 'targetCountryInput');
+      collectCheckbox('serviceTypeGroup', 'serviceTypeInput');
+      collectCheckbox('studyTourGroup', 'studyTourInput');
+      collectCheckbox('visaGroup', 'visaCategoriesInput');
       collectCheckbox('reasonGroup', 'reasonInput');
 
-      // 上传简历
-      if (currentFile) {
-        const fileName = Date.now() + '_' + currentFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        const { error: uploadError } = await supabaseClient
-          .storage.from('resumes').upload(fileName, currentFile, { contentType: currentFile.type });
-        if (uploadError) {
-          showMsg('简历上传失败：' + uploadError.message, 'error');
-          btn.disabled = false; btn.textContent = '提交评估申请';
-          return;
-        }
-        const { data: urlData } = supabaseClient.storage.from('resumes').getPublicUrl(fileName);
-        document.getElementById('resumeUrlInput').value = urlData.publicUrl;
+      // 校验必填多选
+      if (!document.getElementById('serviceTypeInput').value) {
+        showMsg('请至少选择一项服务类型', 'error');
+        btn.disabled = false; btn.textContent = '提交评估申请';
+        return;
       }
-
-      // 手动校验多选必填项
       if (!document.getElementById('languagesInput').value) {
         showMsg('请至少选择一项外语能力', 'error');
+        btn.disabled = false; btn.textContent = '提交评估申请';
+        return;
+      }
+      if (!document.getElementById('visaCategoriesInput').value) {
+        showMsg('请至少选择一项感兴趣的签证类别', 'error');
         btn.disabled = false; btn.textContent = '提交评估申请';
         return;
       }
@@ -529,15 +774,61 @@
         btn.disabled = false; btn.textContent = '提交评估申请';
         return;
       }
-      if (!document.getElementById('targetCountryInput').value) {
-        showMsg('请至少选择一项想申请移民的国家', 'error');
+
+      // 并行上传所有文件
+      try {
+        const [resumeUrl, englishScoreUrl, eduCertUrl, transcriptUrl] = await Promise.all([
+          uploaders.resume.upload(),
+          uploaders.englishScore.upload(),
+          uploaders.eduCert.upload(),
+          uploaders.transcript.upload()
+        ]);
+
+        if (resumeUrl) document.getElementById('resumeUrlInput').value = resumeUrl;
+        if (englishScoreUrl) document.getElementById('englishScoreUrlInput').value = englishScoreUrl;
+      } catch (err) {
+        showMsg('文件上传失败：' + err.message, 'error');
         btn.disabled = false; btn.textContent = '提交评估申请';
         return;
       }
 
       const formData = new FormData(e.target);
       const data = {};
-      formData.forEach((v, k) => { if(v) data[k] = v; });
+      formData.forEach((v, k) => { if(v !== '' && v !== null && v !== undefined) data[k] = v; });
+
+      // 构建 JSONB 字段
+      const languageScores = buildLanguageScores();
+      if (languageScores) data.language_scores = languageScores;
+
+      const resumeUrl = data.resume_url || null;
+      const englishScoreUrl = data.english_score_url || null;
+      const eduCertUrl = uploaders.eduCert.lastUrl || null;
+      const transcriptUrl = uploaders.transcript.lastUrl || null;
+
+      // 构建 document_urls JSONB
+      const documentUrls = {};
+      if (resumeUrl) documentUrls.resume = resumeUrl;
+      if (englishScoreUrl) documentUrls.language_score = englishScoreUrl;
+      if (eduCertUrl) documentUrls.education_cert = eduCertUrl;
+      if (transcriptUrl) documentUrls.transcript = transcriptUrl;
+      if (Object.keys(documentUrls).length) data.document_urls = documentUrls;
+
+      // has_skills_assessment 转布尔
+      if (data.has_skills_assessment === 'true') data.has_skills_assessment = true;
+      else if (data.has_skills_assessment === 'false') data.has_skills_assessment = false;
+      else delete data.has_skills_assessment;
+
+      // 删除已聚合到 JSONB 的原始字段，避免重复存储
+      delete data.ielts_listening;
+      delete data.ielts_speaking;
+      delete data.ielts_reading;
+      delete data.ielts_writing;
+      delete data.pte_listening;
+      delete data.pte_speaking;
+      delete data.pte_reading;
+      delete data.pte_writing;
+      delete data.other_english_name;
+      delete data.other_english_details;
 
       const { error } = await supabaseClient.from('candidate_assessments').insert([data]);
 
@@ -547,6 +838,7 @@
       } else {
         showMsg('提交成功！我们的移民专家将在3个工作日内与您联系。', 'success');
         e.target.reset();
+        Object.values(uploaders).forEach(u => { if (u.reset) u.reset(); });
         loadRecords();
       }
 
@@ -575,7 +867,7 @@
       }
 
       let html = '<div style="overflow-x:auto"><table><thead><tr>' +
-        '<th>提交时间</th><th>姓名</th><th>手机</th><th>邮箱</th><th>当前职业</th><th>目标国家</th>' +
+        '<th>提交时间</th><th>姓名</th><th>手机</th><th>邮箱</th><th>服务类型</th><th>当前职业</th><th>目标国家</th><th>签证类别</th>' +
         '</tr></thead><tbody>';
       data.forEach(r => {
         html += '<tr>' +
@@ -583,8 +875,10 @@
           '<td>' + (r.name_cn || '-') + '</td>' +
           '<td>' + (r.phone || '-') + '</td>' +
           '<td>' + (r.email || '-') + '</td>' +
+          '<td>' + (r.consult_service_types || '-') + '</td>' +
           '<td>' + (r.current_job_title || '-') + '</td>' +
           '<td>' + (r.target_country || '-') + '</td>' +
+          '<td>' + (r.visa_categories || '-') + '</td>' +
           '</tr>';
       });
       html += '</tbody></table></div>';
