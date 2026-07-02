@@ -559,7 +559,6 @@
             <label for="englishScoreFile2" class="file-btn">点击选择文件</label>
             <p class="file-hint" id="englishScoreStatus2">或将文件拖放到此处</p>
           </div>
-          <input type="hidden" name="english_score_url" id="englishScoreUrlInput">
         </div>
 
         <div class="form-group upload-item">
@@ -785,7 +784,6 @@
         ]);
 
         if (resumeUrl) document.getElementById('resumeUrlInput').value = resumeUrl;
-        if (englishScoreUrl) document.getElementById('englishScoreUrlInput').value = englishScoreUrl;
       } catch (err) {
         showMsg('文件上传失败：' + err.message, 'error');
         btn.disabled = false; btn.textContent = '提交评估申请';
@@ -801,7 +799,7 @@
       if (languageScores) data.language_scores = languageScores;
 
       const resumeUrl = data.resume_url || null;
-      const englishScoreUrl = data.english_score_url || null;
+      const englishScoreUrl = uploaders.englishScore.lastUrl || null;
       const eduCertUrl = uploaders.eduCert.lastUrl || null;
       const transcriptUrl = uploaders.transcript.lastUrl || null;
 
