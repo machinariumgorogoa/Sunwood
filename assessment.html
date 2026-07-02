@@ -87,6 +87,35 @@
       font-weight: 500;
       margin-bottom: 4px;
     }
+    .tabs { margin-bottom: 18px; }
+    .tab-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+    .tab-btn {
+      padding: 8px 14px;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: .85rem;
+      color: #475569;
+      transition: all .2s;
+    }
+    .tab-btn:hover {
+      background: #e2e8f0;
+      border-color: #94a3b8;
+    }
+    .tab-btn.active {
+      background: #1e3a5f;
+      color: #fff;
+      border-color: #1e3a5f;
+      font-weight: 600;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
     .visa-group { flex-direction: column; gap: 8px; }
     .visa-group .visa-section-title {
       width: 100%;
@@ -316,41 +345,72 @@
         <input type="hidden" name="languages" id="languagesInput">
       </div>
 
-      <div class="form-group">
-        <label>IELTS 单项成绩</label>
-        <div class="row score-row">
-          <div class="form-group"><label class="sub-label">听力</label><input type="number" name="ielts_listening" step="0.5" min="0" max="9" placeholder="0-9"></div>
-          <div class="form-group"><label class="sub-label">口语</label><input type="number" name="ielts_speaking" step="0.5" min="0" max="9" placeholder="0-9"></div>
-          <div class="form-group"><label class="sub-label">阅读</label><input type="number" name="ielts_reading" step="0.5" min="0" max="9" placeholder="0-9"></div>
-          <div class="form-group"><label class="sub-label">写作</label><input type="number" name="ielts_writing" step="0.5" min="0" max="9" placeholder="0-9"></div>
+      <div class="tabs" id="mainLangTabs">
+        <label>英语考试成绩（按考试类型切换）</label>
+        <div class="tab-buttons">
+          <button type="button" class="tab-btn active" data-tab="ielts">IELTS</button>
+          <button type="button" class="tab-btn" data-tab="pte">PTE</button>
+          <button type="button" class="tab-btn" data-tab="toefl">TOEFL</button>
+          <button type="button" class="tab-btn" data-tab="cae">CAE</button>
+          <button type="button" class="tab-btn" data-tab="oet">OET</button>
+          <button type="button" class="tab-btn" data-tab="other">其他</button>
         </div>
-        <input type="hidden" name="ielts_score" id="ieltsScoreInput">
-      </div>
-
-      <div class="form-group">
-        <label>PTE 单项成绩</label>
-        <div class="row score-row">
-          <div class="form-group"><label class="sub-label">听力</label><input type="number" name="pte_listening" min="0" max="90" placeholder="0-90"></div>
-          <div class="form-group"><label class="sub-label">口语</label><input type="number" name="pte_speaking" min="0" max="90" placeholder="0-90"></div>
-          <div class="form-group"><label class="sub-label">阅读</label><input type="number" name="pte_reading" min="0" max="90" placeholder="0-90"></div>
-          <div class="form-group"><label class="sub-label">写作</label><input type="number" name="pte_writing" min="0" max="90" placeholder="0-90"></div>
+        <div class="tab-content active" data-tab="ielts">
+          <div class="row score-row">
+            <div class="form-group"><label class="sub-label">听力</label><input type="number" name="ielts_listening" step="0.5" min="0" max="9" placeholder="0-9"></div>
+            <div class="form-group"><label class="sub-label">口语</label><input type="number" name="ielts_speaking" step="0.5" min="0" max="9" placeholder="0-9"></div>
+            <div class="form-group"><label class="sub-label">阅读</label><input type="number" name="ielts_reading" step="0.5" min="0" max="9" placeholder="0-9"></div>
+            <div class="form-group"><label class="sub-label">写作</label><input type="number" name="ielts_writing" step="0.5" min="0" max="9" placeholder="0-9"></div>
+          </div>
         </div>
-        <input type="hidden" name="pte_score" id="pteScoreInput">
-      </div>
-
-      <div class="row">
-        <div class="form-group">
-          <label>其他英语考试名称</label>
-          <input type="text" name="other_english_name" placeholder="例如：TOEFL、CAE、OET">
+        <div class="tab-content" data-tab="pte">
+          <div class="row score-row">
+            <div class="form-group"><label class="sub-label">听力</label><input type="number" name="pte_listening" min="0" max="90" placeholder="0-90"></div>
+            <div class="form-group"><label class="sub-label">口语</label><input type="number" name="pte_speaking" min="0" max="90" placeholder="0-90"></div>
+            <div class="form-group"><label class="sub-label">阅读</label><input type="number" name="pte_reading" min="0" max="90" placeholder="0-90"></div>
+            <div class="form-group"><label class="sub-label">写作</label><input type="number" name="pte_writing" min="0" max="90" placeholder="0-90"></div>
+          </div>
         </div>
-        <div class="form-group">
-          <label>其他英语考试总分</label>
-          <input type="text" name="other_english_score" placeholder="未参加可跳过">
+        <div class="tab-content" data-tab="toefl">
+          <div class="row score-row">
+            <div class="form-group"><label class="sub-label">听力</label><input type="number" name="toefl_listening" min="0" max="30" placeholder="0-30"></div>
+            <div class="form-group"><label class="sub-label">口语</label><input type="number" name="toefl_speaking" min="0" max="30" placeholder="0-30"></div>
+            <div class="form-group"><label class="sub-label">阅读</label><input type="number" name="toefl_reading" min="0" max="30" placeholder="0-30"></div>
+            <div class="form-group"><label class="sub-label">写作</label><input type="number" name="toefl_writing" min="0" max="30" placeholder="0-30"></div>
+          </div>
         </div>
-      </div>
-      <div class="form-group">
-        <label>其他英语考试单项成绩（如有）</label>
-        <input type="text" name="other_english_details" placeholder="例如：听力25 口语23 阅读24 写作22">
+        <div class="tab-content" data-tab="cae">
+          <div class="row score-row">
+            <div class="form-group"><label class="sub-label">听力</label><input type="text" name="cae_listening" placeholder="例如：210"></div>
+            <div class="form-group"><label class="sub-label">口语</label><input type="text" name="cae_speaking" placeholder="例如：210"></div>
+            <div class="form-group"><label class="sub-label">阅读</label><input type="text" name="cae_reading" placeholder="例如：210"></div>
+            <div class="form-group"><label class="sub-label">写作</label><input type="text" name="cae_writing" placeholder="例如：210"></div>
+          </div>
+        </div>
+        <div class="tab-content" data-tab="oet">
+          <div class="row score-row">
+            <div class="form-group"><label class="sub-label">听力</label><input type="text" name="oet_listening" placeholder="例如：B"></div>
+            <div class="form-group"><label class="sub-label">口语</label><input type="text" name="oet_speaking" placeholder="例如：B"></div>
+            <div class="form-group"><label class="sub-label">阅读</label><input type="text" name="oet_reading" placeholder="例如：B"></div>
+            <div class="form-group"><label class="sub-label">写作</label><input type="text" name="oet_writing" placeholder="例如：B"></div>
+          </div>
+        </div>
+        <div class="tab-content" data-tab="other">
+          <div class="form-group">
+            <label>考试名称</label>
+            <input type="text" name="other_english_name" placeholder="请填写考试英文简称或全称">
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label>总分</label>
+              <input type="text" name="other_english_score" placeholder="例如：100">
+            </div>
+            <div class="form-group">
+              <label>单项成绩</label>
+              <input type="text" name="other_english_details" placeholder="建议按 听/说/读/写 填写，例如：28/24/26/22">
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- 职业评估与证书 -->
@@ -414,9 +474,72 @@
           <input type="number" name="spouse_work_years" min="0" max="60">
         </div>
       </div>
-      <div class="form-group">
-        <label>配偶英语成绩</label>
-        <input type="text" name="spouse_english_score" placeholder="可填写总分或单项">
+      <div class="tabs" id="spouseLangTabs">
+        <label>配偶/伴侣英语成绩（按考试类型切换）</label>
+        <div class="tab-buttons">
+          <button type="button" class="tab-btn active" data-tab="ielts">IELTS</button>
+          <button type="button" class="tab-btn" data-tab="pte">PTE</button>
+          <button type="button" class="tab-btn" data-tab="toefl">TOEFL</button>
+          <button type="button" class="tab-btn" data-tab="cae">CAE</button>
+          <button type="button" class="tab-btn" data-tab="oet">OET</button>
+          <button type="button" class="tab-btn" data-tab="other">其他</button>
+        </div>
+        <div class="tab-content active" data-tab="ielts">
+          <div class="row score-row">
+            <div class="form-group"><label class="sub-label">听力</label><input type="number" name="spouse_ielts_listening" step="0.5" min="0" max="9" placeholder="0-9"></div>
+            <div class="form-group"><label class="sub-label">口语</label><input type="number" name="spouse_ielts_speaking" step="0.5" min="0" max="9" placeholder="0-9"></div>
+            <div class="form-group"><label class="sub-label">阅读</label><input type="number" name="spouse_ielts_reading" step="0.5" min="0" max="9" placeholder="0-9"></div>
+            <div class="form-group"><label class="sub-label">写作</label><input type="number" name="spouse_ielts_writing" step="0.5" min="0" max="9" placeholder="0-9"></div>
+          </div>
+        </div>
+        <div class="tab-content" data-tab="pte">
+          <div class="row score-row">
+            <div class="form-group"><label class="sub-label">听力</label><input type="number" name="spouse_pte_listening" min="0" max="90" placeholder="0-90"></div>
+            <div class="form-group"><label class="sub-label">口语</label><input type="number" name="spouse_pte_speaking" min="0" max="90" placeholder="0-90"></div>
+            <div class="form-group"><label class="sub-label">阅读</label><input type="number" name="spouse_pte_reading" min="0" max="90" placeholder="0-90"></div>
+            <div class="form-group"><label class="sub-label">写作</label><input type="number" name="spouse_pte_writing" min="0" max="90" placeholder="0-90"></div>
+          </div>
+        </div>
+        <div class="tab-content" data-tab="toefl">
+          <div class="row score-row">
+            <div class="form-group"><label class="sub-label">听力</label><input type="number" name="spouse_toefl_listening" min="0" max="30" placeholder="0-30"></div>
+            <div class="form-group"><label class="sub-label">口语</label><input type="number" name="spouse_toefl_speaking" min="0" max="30" placeholder="0-30"></div>
+            <div class="form-group"><label class="sub-label">阅读</label><input type="number" name="spouse_toefl_reading" min="0" max="30" placeholder="0-30"></div>
+            <div class="form-group"><label class="sub-label">写作</label><input type="number" name="spouse_toefl_writing" min="0" max="30" placeholder="0-30"></div>
+          </div>
+        </div>
+        <div class="tab-content" data-tab="cae">
+          <div class="row score-row">
+            <div class="form-group"><label class="sub-label">听力</label><input type="text" name="spouse_cae_listening" placeholder="例如：210"></div>
+            <div class="form-group"><label class="sub-label">口语</label><input type="text" name="spouse_cae_speaking" placeholder="例如：210"></div>
+            <div class="form-group"><label class="sub-label">阅读</label><input type="text" name="spouse_cae_reading" placeholder="例如：210"></div>
+            <div class="form-group"><label class="sub-label">写作</label><input type="text" name="spouse_cae_writing" placeholder="例如：210"></div>
+          </div>
+        </div>
+        <div class="tab-content" data-tab="oet">
+          <div class="row score-row">
+            <div class="form-group"><label class="sub-label">听力</label><input type="text" name="spouse_oet_listening" placeholder="例如：B"></div>
+            <div class="form-group"><label class="sub-label">口语</label><input type="text" name="spouse_oet_speaking" placeholder="例如：B"></div>
+            <div class="form-group"><label class="sub-label">阅读</label><input type="text" name="spouse_oet_reading" placeholder="例如：B"></div>
+            <div class="form-group"><label class="sub-label">写作</label><input type="text" name="spouse_oet_writing" placeholder="例如：B"></div>
+          </div>
+        </div>
+        <div class="tab-content" data-tab="other">
+          <div class="form-group">
+            <label>考试名称</label>
+            <input type="text" name="spouse_other_english_name" placeholder="请填写考试英文简称或全称">
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label>总分</label>
+              <input type="text" name="spouse_other_english_score" placeholder="例如：100">
+            </div>
+            <div class="form-group">
+              <label>单项成绩</label>
+              <input type="text" name="spouse_other_english_details" placeholder="建议按 听/说/读/写 填写，例如：28/24/26/22">
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- 移民意向 -->
@@ -440,55 +563,72 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <label>感兴趣的签证类别/服务（至少选一项）<span class="req">*</span></label>
-        <div class="checkbox-group visa-group" id="visaGroup">
-          <div class="visa-section-title">常见业务</div>
-          <label><input type="checkbox" value="482 技能紧缺签证"> 482 技能紧缺签证</label>
-          <label><input type="checkbox" value="186 ENS 雇主担保永居"> 186 ENS 雇主担保永居</label>
-          <label><input type="checkbox" value="494 雇主担保区域临居"> 494 雇主担保区域临居</label>
-          <label><input type="checkbox" value="189 独立技术移民"> 189 独立技术移民</label>
-          <label><input type="checkbox" value="190 州担保技术移民"> 190 州担保技术移民</label>
-          <label><input type="checkbox" value="491 偏远地区技术移民"> 491 偏远地区技术移民</label>
-          <label><input type="checkbox" value="485 毕业生工签"> 485 毕业生工签</label>
-          <label><input type="checkbox" value="500 学生签证"> 500 学生签证</label>
-          <label><input type="checkbox" value="600 旅游签证"> 600 旅游签证</label>
-          <label><input type="checkbox" value="309/100 配偶签证（境外）"> 309/100 配偶签证（境外）</label>
-          <label><input type="checkbox" value="820/801 配偶签证（境内）"> 820/801 配偶签证（境内）</label>
-          <label><input type="checkbox" value="143/864 父母移民"> 143/864 父母移民</label>
-          <label><input type="checkbox" value="103/804 父母排队移民"> 103/804 父母排队移民</label>
-          <label><input type="checkbox" value="870 父母临居担保"> 870 父母临居担保</label>
-          <label><input type="checkbox" value="101/802 子女签证"> 101/802 子女签证</label>
-          <label><input type="checkbox" value="155/157 居民往返签"> 155/157 居民往返签</label>
-
-          <div class="visa-section-title">工作/培训类</div>
-          <label><input type="checkbox" value="407 培训签证"> 407 培训签证</label>
-          <label><input type="checkbox" value="408 临时活动签证"> 408 临时活动签证</label>
-          <label><input type="checkbox" value="400 短期工作签证"> 400 短期工作签证</label>
-          <label><input type="checkbox" value="462/417 打工度假签证"> 462/417 打工度假签证</label>
-
-          <div class="visa-section-title">人才/投资类</div>
-          <label><input type="checkbox" value="NIV 858 国家创新签证"> NIV 858 国家创新签证</label>
-          <label><input type="checkbox" value="188/888 商业创新与投资签证"> 188/888 商业创新与投资签证</label>
-
-          <div class="visa-section-title">其他家庭类</div>
-          <label><input type="checkbox" value="300 准结婚签证"> 300 准结婚签证</label>
-          <label><input type="checkbox" value="102 领养签证"> 102 领养签证</label>
-          <label><input type="checkbox" value="461 新西兰公民家庭关系"> 461 新西兰公民家庭关系</label>
-
-          <div class="visa-section-title">医疗/人道类</div>
-          <label><input type="checkbox" value="602 医疗签证"> 602 医疗签证</label>
-          <label><input type="checkbox" value="866 庇护签证"> 866 庇护签证</label>
-
-          <div class="visa-section-title">上诉/干预类</div>
-          <label><input type="checkbox" value="AAT/FCC 上诉"> AAT/FCC 上诉</label>
-          <label><input type="checkbox" value="部长干预"> 部长干预</label>
-          <label><input type="checkbox" value="签证取消/拒签处理"> 签证取消/拒签处理</label>
-
-          <div class="visa-section-title">入籍/续签</div>
-          <label><input type="checkbox" value="入籍申请（授予）"> 入籍申请（授予）</label>
-          <label><input type="checkbox" value="入籍申请（血统）"> 入籍申请（血统）</label>
-          <label><input type="checkbox" value="155/157 居民往返签续签"> 155/157 居民往返签续签</label>
+      <div class="tabs" id="visaTabs">
+        <label>感兴趣的签证类别/服务（至少选一项，可跨标签多选）<span class="req">*</span></label>
+        <div class="tab-buttons">
+          <button type="button" class="tab-btn active" data-tab="common">常见业务</button>
+          <button type="button" class="tab-btn" data-tab="work">工作/培训</button>
+          <button type="button" class="tab-btn" data-tab="talent">人才/投资</button>
+          <button type="button" class="tab-btn" data-tab="family">家庭类</button>
+          <button type="button" class="tab-btn" data-tab="medical">医疗/人道/上诉</button>
+          <button type="button" class="tab-btn" data-tab="citizenship">入籍/续签</button>
+        </div>
+        <div class="tab-content active" data-tab="common">
+          <div class="checkbox-group visa-group">
+            <label><input type="checkbox" value="482 技能紧缺签证"> 482 技能紧缺签证</label>
+            <label><input type="checkbox" value="186 ENS 雇主担保永居"> 186 ENS 雇主担保永居</label>
+            <label><input type="checkbox" value="494 雇主担保区域临居"> 494 雇主担保区域临居</label>
+            <label><input type="checkbox" value="189 独立技术移民"> 189 独立技术移民</label>
+            <label><input type="checkbox" value="190 州担保技术移民"> 190 州担保技术移民</label>
+            <label><input type="checkbox" value="491 偏远地区技术移民"> 491 偏远地区技术移民</label>
+            <label><input type="checkbox" value="485 毕业生工签"> 485 毕业生工签</label>
+            <label><input type="checkbox" value="500 学生签证"> 500 学生签证</label>
+            <label><input type="checkbox" value="600 旅游签证"> 600 旅游签证</label>
+            <label><input type="checkbox" value="309/100 配偶签证（境外）"> 309/100 配偶签证（境外）</label>
+            <label><input type="checkbox" value="820/801 配偶签证（境内）"> 820/801 配偶签证（境内）</label>
+            <label><input type="checkbox" value="143/864 父母移民"> 143/864 父母移民</label>
+            <label><input type="checkbox" value="103/804 父母排队移民"> 103/804 父母排队移民</label>
+            <label><input type="checkbox" value="870 父母临居担保"> 870 父母临居担保</label>
+            <label><input type="checkbox" value="101/802 子女签证"> 101/802 子女签证</label>
+            <label><input type="checkbox" value="155/157 居民往返签"> 155/157 居民往返签</label>
+          </div>
+        </div>
+        <div class="tab-content" data-tab="work">
+          <div class="checkbox-group visa-group">
+            <label><input type="checkbox" value="407 培训签证"> 407 培训签证</label>
+            <label><input type="checkbox" value="408 临时活动签证"> 408 临时活动签证</label>
+            <label><input type="checkbox" value="400 短期工作签证"> 400 短期工作签证</label>
+            <label><input type="checkbox" value="462/417 打工度假签证"> 462/417 打工度假签证</label>
+          </div>
+        </div>
+        <div class="tab-content" data-tab="talent">
+          <div class="checkbox-group visa-group">
+            <label><input type="checkbox" value="NIV 858 国家创新签证"> NIV 858 国家创新签证</label>
+            <label><input type="checkbox" value="188/888 商业创新与投资签证"> 188/888 商业创新与投资签证</label>
+          </div>
+        </div>
+        <div class="tab-content" data-tab="family">
+          <div class="checkbox-group visa-group">
+            <label><input type="checkbox" value="300 准结婚签证"> 300 准结婚签证</label>
+            <label><input type="checkbox" value="102 领养签证"> 102 领养签证</label>
+            <label><input type="checkbox" value="461 新西兰公民家庭关系"> 461 新西兰公民家庭关系</label>
+          </div>
+        </div>
+        <div class="tab-content" data-tab="medical">
+          <div class="checkbox-group visa-group">
+            <label><input type="checkbox" value="602 医疗签证"> 602 医疗签证</label>
+            <label><input type="checkbox" value="866 庇护签证"> 866 庇护签证</label>
+            <label><input type="checkbox" value="AAT/FCC 上诉"> AAT/FCC 上诉</label>
+            <label><input type="checkbox" value="部长干预"> 部长干预</label>
+            <label><input type="checkbox" value="签证取消/拒签处理"> 签证取消/拒签处理</label>
+          </div>
+        </div>
+        <div class="tab-content" data-tab="citizenship">
+          <div class="checkbox-group visa-group">
+            <label><input type="checkbox" value="入籍申请（授予）"> 入籍申请（授予）</label>
+            <label><input type="checkbox" value="入籍申请（血统）"> 入籍申请（血统）</label>
+            <label><input type="checkbox" value="155/157 居民往返签续签"> 155/157 居民往返签续签</label>
+          </div>
         </div>
         <input type="hidden" name="visa_categories" id="visaCategoriesInput" required>
       </div>
@@ -498,7 +638,7 @@
           <label>澳洲移民意向确认<span class="req">*</span></label>
           <select name="immigration_intent" required>
             <option value="">请选择</option>
-            <option>有</option><option>暂无计划</option>
+            <option>有</option><option>考虑中</option><option>暂无计划</option>
           </select>
         </div>
         <div class="form-group">
@@ -520,12 +660,24 @@
       <div class="section-title">联系方式</div>
       <div class="row">
         <div class="form-group">
-          <label>手机<span class="req">*</span></label>
-          <input type="text" name="phone" required>
+          <label>国家代码</label>
+          <select name="phone_country_code">
+            <option value="+61" selected>+61 澳大利亚</option>
+            <option value="+86">+86 中国大陆</option>
+            <option value="+852">+852 香港</option>
+            <option value="+886">+886 台湾</option>
+            <option value="+65">+65 新加坡</option>
+            <option value="+64">+64 新西兰</option>
+            <option value="+81">+81 日本</option>
+            <option value="+82">+82 韩国</option>
+            <option value="+44">+44 英国</option>
+            <option value="+1">+1 美国/加拿大</option>
+            <option value="其他">其他</option>
+          </select>
         </div>
         <div class="form-group">
-          <label>邮箱<span class="req">*</span></label>
-          <input type="email" name="email" required>
+          <label>手机号<span class="req">*</span></label>
+          <input type="text" name="phone" placeholder="填写手机号，不含国家代码" required>
         </div>
       </div>
 
@@ -545,17 +697,16 @@
         <div class="form-group upload-item">
           <label>简历（PDF/Word，10MB以内）</label>
           <div class="file-upload" id="resumeDropZone">
-            <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" hidden>
+            <input type="file" id="resumeFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif" hidden>
             <label for="resumeFile" class="file-btn">点击选择文件</label>
             <p class="file-hint" id="resumeStatus">或将文件拖放到此处</p>
           </div>
-          <input type="hidden" name="resume_url" id="resumeUrlInput">
         </div>
 
         <div class="form-group upload-item">
           <label>语言成绩单（PDF/图片，10MB以内）</label>
           <div class="file-upload" id="englishScoreDropZone2">
-            <input type="file" id="englishScoreFile2" accept=".pdf,.jpg,.jpeg,.png" hidden>
+            <input type="file" id="englishScoreFile2" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif" hidden>
             <label for="englishScoreFile2" class="file-btn">点击选择文件</label>
             <p class="file-hint" id="englishScoreStatus2">或将文件拖放到此处</p>
           </div>
@@ -564,7 +715,7 @@
         <div class="form-group upload-item">
           <label>学历证明（PDF/图片，10MB以内）</label>
           <div class="file-upload" id="eduCertDropZone">
-            <input type="file" id="eduCertFile" accept=".pdf,.jpg,.jpeg,.png" hidden>
+            <input type="file" id="eduCertFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif" hidden>
             <label for="eduCertFile" class="file-btn">点击选择文件</label>
             <p class="file-hint" id="eduCertStatus">或将文件拖放到此处</p>
           </div>
@@ -573,7 +724,7 @@
         <div class="form-group upload-item">
           <label>成绩单（PDF/图片，10MB以内）</label>
           <div class="file-upload" id="transcriptDropZone">
-            <input type="file" id="transcriptFile" accept=".pdf,.jpg,.jpeg,.png" hidden>
+            <input type="file" id="transcriptFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif" hidden>
             <label for="transcriptFile" class="file-btn">点击选择文件</label>
             <p class="file-hint" id="transcriptStatus">或将文件拖放到此处</p>
           </div>
@@ -661,22 +812,39 @@
       };
     }
 
+    // 标签页切换
+    function setupTabs(containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      const buttons = container.querySelectorAll('.tab-btn');
+      const contents = container.querySelectorAll('.tab-content');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = btn.dataset.tab;
+          buttons.forEach(b => b.classList.remove('active'));
+          contents.forEach(c => c.classList.remove('active'));
+          btn.classList.add('active');
+          container.querySelector(`.tab-content[data-tab="${tab}"]`).classList.add('active');
+        });
+      });
+    }
+
     const uploaders = {
       resume: createUploader({
         zoneId: 'resumeDropZone', inputId: 'resumeFile', statusId: 'resumeStatus',
-        prefix: 'resume', accept: '.pdf,.doc,.docx'
+        prefix: 'resume', accept: '.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif'
       }),
       englishScore: createUploader({
         zoneId: 'englishScoreDropZone2', inputId: 'englishScoreFile2', statusId: 'englishScoreStatus2',
-        prefix: 'english', accept: '.pdf,.jpg,.jpeg,.png'
+        prefix: 'english', accept: '.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif'
       }),
       eduCert: createUploader({
         zoneId: 'eduCertDropZone', inputId: 'eduCertFile', statusId: 'eduCertStatus',
-        prefix: 'edu', accept: '.pdf,.jpg,.jpeg,.png'
+        prefix: 'edu', accept: '.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif'
       }),
       transcript: createUploader({
         zoneId: 'transcriptDropZone', inputId: 'transcriptFile', statusId: 'transcriptStatus',
-        prefix: 'transcript', accept: '.pdf,.jpg,.jpeg,.png'
+        prefix: 'transcript', accept: '.pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif'
       })
     };
 
@@ -688,8 +856,12 @@
     document.getElementById('langGroup').addEventListener('change', () => collectCheckbox('langGroup', 'languagesInput'));
     document.getElementById('serviceTypeGroup').addEventListener('change', () => collectCheckbox('serviceTypeGroup', 'serviceTypeInput'));
     document.getElementById('studyTourGroup').addEventListener('change', () => collectCheckbox('studyTourGroup', 'studyTourInput'));
-    document.getElementById('visaGroup').addEventListener('change', () => collectCheckbox('visaGroup', 'visaCategoriesInput'));
+    document.getElementById('visaTabs').addEventListener('change', () => collectCheckbox('visaTabs', 'visaCategoriesInput'));
     document.getElementById('reasonGroup').addEventListener('change', () => collectCheckbox('reasonGroup', 'reasonInput'));
+
+    setupTabs('mainLangTabs');
+    setupTabs('spouseLangTabs');
+    setupTabs('visaTabs');
 
     function getScore(name) {
       const el = document.querySelector(`[name="${name}"]`);
@@ -700,35 +872,58 @@
 
     function buildLanguageScores() {
       const scores = {};
-      const ielts = {
-        listening: getScore('ielts_listening'),
-        speaking: getScore('ielts_speaking'),
-        reading: getScore('ielts_reading'),
-        writing: getScore('ielts_writing')
-      };
-      const pte = {
-        listening: getScore('pte_listening'),
-        speaking: getScore('pte_speaking'),
-        reading: getScore('pte_reading'),
-        writing: getScore('pte_writing')
-      };
+      const tests = [
+        { key: 'ielts', prefix: 'ielts' },
+        { key: 'pte', prefix: 'pte' },
+        { key: 'toefl', prefix: 'toefl' },
+        { key: 'cae', prefix: 'cae' },
+        { key: 'oet', prefix: 'oet' }
+      ];
+      tests.forEach(({ key, prefix }) => {
+        const s = {
+          listening: getScore(prefix + '_listening'),
+          speaking: getScore(prefix + '_speaking'),
+          reading: getScore(prefix + '_reading'),
+          writing: getScore(prefix + '_writing')
+        };
+        if (s.listening || s.speaking || s.reading || s.writing) scores[key] = s;
+      });
+
       const otherName = document.querySelector('[name="other_english_name"]')?.value;
       const otherScore = document.querySelector('[name="other_english_score"]')?.value;
       const otherDetails = document.querySelector('[name="other_english_details"]')?.value;
-
-      if (ielts.listening || ielts.speaking || ielts.reading || ielts.writing) scores.ielts = ielts;
-      if (pte.listening || pte.speaking || pte.reading || pte.writing) scores.pte = pte;
       if (otherName || otherScore || otherDetails) {
         scores.other = { name: otherName || null, details: otherDetails || null };
       }
 
-      // 兼容性：保留原有总分字段
-      const ieltsOverall = [ielts.listening, ielts.speaking, ielts.reading, ielts.writing]
-        .filter(v => v !== null).join(' / ');
-      const pteOverall = [pte.listening, pte.speaking, pte.reading, pte.writing]
-        .filter(v => v !== null).join(' / ');
-      if (ieltsOverall) document.getElementById('ieltsScoreInput').value = ieltsOverall;
-      if (pteOverall) document.getElementById('pteScoreInput').value = pteOverall;
+      return Object.keys(scores).length ? scores : null;
+    }
+
+    function buildSpouseLanguageScores() {
+      const scores = {};
+      const tests = [
+        { key: 'ielts', prefix: 'spouse_ielts' },
+        { key: 'pte', prefix: 'spouse_pte' },
+        { key: 'toefl', prefix: 'spouse_toefl' },
+        { key: 'cae', prefix: 'spouse_cae' },
+        { key: 'oet', prefix: 'spouse_oet' }
+      ];
+      tests.forEach(({ key, prefix }) => {
+        const s = {
+          listening: getScore(prefix + '_listening'),
+          speaking: getScore(prefix + '_speaking'),
+          reading: getScore(prefix + '_reading'),
+          writing: getScore(prefix + '_writing')
+        };
+        if (s.listening || s.speaking || s.reading || s.writing) scores[key] = s;
+      });
+
+      const otherName = document.querySelector('[name="spouse_other_english_name"]')?.value;
+      const otherScore = document.querySelector('[name="spouse_other_english_score"]')?.value;
+      const otherDetails = document.querySelector('[name="spouse_other_english_details"]')?.value;
+      if (otherName || otherScore || otherDetails) {
+        scores.other = { name: otherName || null, details: otherDetails || null };
+      }
 
       return Object.keys(scores).length ? scores : null;
     }
@@ -749,7 +944,7 @@
       collectCheckbox('langGroup', 'languagesInput');
       collectCheckbox('serviceTypeGroup', 'serviceTypeInput');
       collectCheckbox('studyTourGroup', 'studyTourInput');
-      collectCheckbox('visaGroup', 'visaCategoriesInput');
+      collectCheckbox('visaTabs', 'visaCategoriesInput');
       collectCheckbox('reasonGroup', 'reasonInput');
 
       // 校验必填多选
@@ -783,7 +978,6 @@
           uploaders.transcript.upload()
         ]);
 
-        if (resumeUrl) document.getElementById('resumeUrlInput').value = resumeUrl;
       } catch (err) {
         showMsg('文件上传失败：' + err.message, 'error');
         btn.disabled = false; btn.textContent = '提交评估申请';
@@ -798,7 +992,10 @@
       const languageScores = buildLanguageScores();
       if (languageScores) data.language_scores = languageScores;
 
-      const resumeUrl = data.resume_url || null;
+      const spouseLanguageScores = buildSpouseLanguageScores();
+      if (spouseLanguageScores) data.spouse_language_scores = spouseLanguageScores;
+
+      const resumeUrl = uploaders.resume.lastUrl || null;
       const englishScoreUrl = uploaders.englishScore.lastUrl || null;
       const eduCertUrl = uploaders.eduCert.lastUrl || null;
       const transcriptUrl = uploaders.transcript.lastUrl || null;
@@ -825,8 +1022,23 @@
       delete data.pte_speaking;
       delete data.pte_reading;
       delete data.pte_writing;
+      // 删除已聚合到 JSONB 的原始字段
+      ['ielts', 'pte', 'toefl', 'cae', 'oet'].forEach(prefix => {
+        delete data[prefix + '_listening'];
+        delete data[prefix + '_speaking'];
+        delete data[prefix + '_reading'];
+        delete data[prefix + '_writing'];
+      });
       delete data.other_english_name;
       delete data.other_english_details;
+      ['ielts', 'pte', 'toefl', 'cae', 'oet'].forEach(prefix => {
+        delete data['spouse_' + prefix + '_listening'];
+        delete data['spouse_' + prefix + '_speaking'];
+        delete data['spouse_' + prefix + '_reading'];
+        delete data['spouse_' + prefix + '_writing'];
+      });
+      delete data.spouse_other_english_name;
+      delete data.spouse_other_english_details;
 
       const { error } = await supabaseClient.from('candidate_assessments').insert([data]);
 
