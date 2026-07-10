@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>申请职位 - Sunwood Consulting</title>
+  <script src="supabase.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
+    .container{max-width:700px;margin:0 auto;padding:20px}
+    header{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border-radius:0 0 20px 20px;margin-bottom:30px}
+    header h1{font-size:1.8rem;font-weight:600;margin-bottom:8px;letter-spacing:1px}
+    header p{opacity:.9;font-size:.95rem}
+    .job-banner{background:#e0f2fe;padding:15px 20px;border-radius:10px;margin-bottom:25px;border-left:4px solid #1e3a5f}
+    .job-banner h2{color:#1e3a5f;font-size:1.1rem;margin-bottom:5px}
+    .job-banner p{color:#475569;font-size:.9rem}
+    .profile-banner{background:#f0fdf4;padding:15px 20px;border-radius:10px;margin-bottom:25px;border-left:4px solid #16a34a;display:none}
+    .profile-banner p{color:#166534;margin-bottom:10px;font-size:.9rem}
+    .profile-banner .btn-row{display:flex;gap:10px;flex-wrap:wrap}
+    .btn-secondary{display:inline-block;padding:10px 18px;background:#fff;color:#1e3a5f;border:1.5px solid #1e3a5f;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s}
+    .btn-secondary:hover{background:#f1f5f9}
+    .lookup-btn{padding:10px 14px;background:#f1f5f9;color:#1e3a5f;border:1px solid #cbd5e1;border-radius:8px;font-size:.9rem;cursor:pointer;transition:all .2s}
+    .lookup-btn:hover{background:#e2e8f0}
+    form{background:#fff;padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .form-group{margin-bottom:18px}
+    label{display:block;font-weight:600;color:#444;margin-bottom:6px;font-size:.9rem}
+    input[type="text"],input[type="email"],input[type="tel"],input[type="number"],select,textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:.9rem;transition:border .2s}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:#2d5a87}
+    textarea{min-height:80px;resize:vertical}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    @media(max-width:600px){.row{grid-template-columns:1fr}}
+    .email-row{display:flex;gap:10px;align-items:stretch}
+    .email-row input{flex:1}
+    button[type="submit"]{width:100%;padding:14px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s;margin-top:10px}
+    button[type="submit"]:hover{opacity:.9}
+    button[type="submit"]:disabled{opacity:.5;cursor:not-allowed}
+    .message{padding:12px 15px;border-radius:8px;margin-bottom:20px;display:none;font-size:.9rem}
+    .message.success{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+    .message.error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+    .message.info{background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe}
+    .file-upload{border:2px dashed #cbd5e1;border-radius:10px;padding:20px;text-align:center;transition:all .2s;background:#f8fafc;cursor:pointer}
+    .file-upload:hover{border-color:#2d5a87;background:#f1f5f9}
+    .file-btn{display:inline-block;padding:8px 18px;background:#1e3a5f;color:#fff;border-radius:6px;font-size:.9rem;cursor:pointer}
+    .file-hint{font-size:.8rem;color:#888;margin-top:8px}
+    .resume-status{font-size:.85rem;color:#166534;margin-top:8px}
+    footer{text-align:center;padding:30px;color:#999;font-size:.8rem}
+    .req{color:#dc2626;margin-left:2px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SUNWOOD CONSULTING</h1>
+    <p>Future Management Consulting · Migration and Recruitment Service</p>
+  </header>
+
+  <div class="container">
+    <div class="job-banner" id="jobBanner">
+      <h2>正在加载职位信息...</h2>
+    </div>
+
+    <div class="profile-banner" id="profileBanner">
+      <p id="profileText"></p>
+      <div class="btn-row">
+        <button type="button" class="btn-secondary" id="oneClickBtn" style="display:none">一键申请该职位</button>
+        <button type="button" class="btn-secondary" id="clearProfileBtn" style="display:none;background:#fff;color:#991b1b;border-color:#991b1b">清除自动填充，重新填写</button>
+      </div>
+    </div>
+
+    <div id="msg" class="message"></div>
+
+    <form id="applyForm">
+      <input type="hidden" name="job_id" id="jobIdInput">
+
+      <div class="form-group">
+        <label>姓名（中文）<span class="req">*</span></label>
+        <input type="text" name="name_cn" id="nameCnInput" required>
+      </div>
+
+      <div class="form-group">
+        <label>英文姓名</label>
+        <input type="text" name="name_en" id="nameEnInput" placeholder="名在前，姓氏在后">
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>国家代码</label>
+          <select name="phone_country_code" id="phoneCodeInput">
+            <option value="+61" selected>+61 澳大利亚</option>
+            <option value="+86">+86 中国大陆</option>
+            <option value="+852">+852 香港</option>
+            <option value="+886">+886 台湾</option>
+            <option value="+65">+65 新加坡</option>
+            <option value="+64">+64 新西兰</option>
+            <option value="+81">+81 日本</option>
+            <option value="+82">+82 韩国</option>
+            <option value="+44">+44 英国</option>
+            <option value="+1">+1 美国/加拿大</option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>手机号<span class="req">*</span></label>
+          <input type="tel" name="phone" id="phoneInput" placeholder="不含国家代码" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>邮箱<span class="req">*</span></label>
+        <div class="email-row">
+          <input type="email" name="email" id="emailInput" placeholder="用于查找您的历史资料" required>
+          <button type="button" class="lookup-btn" id="lookupBtn">查找我的资料</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>当前职位<span class="req">*</span></label>
+          <input type="text" name="current_job_title" id="jobTitleInput" placeholder="例如：行政助理" required>
+        </div>
+        <div class="form-group">
+          <label>工作年限<span class="req">*</span></label>
+          <input type="number" name="total_work_years" id="workYearsInput" min="0" max="60" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>核心技能</label>
+        <input type="text" name="skills" id="skillsInput" placeholder="例如：Excel, 库存管理, 中英文沟通，用逗号分隔">
+      </div>
+
+      <div class="form-group">
+        <label>当前所在地</label>
+        <input type="text" name="current_country" id="locationInput" placeholder="例如：中国上海 / 澳大利亚悉尼">
+      </div>
+
+      <div class="form-group">
+        <label>自我介绍 / 求职信</label>
+        <textarea name="recruiter_notes" id="notesInput" placeholder="简述你的工作经历和为什么适合这个职位"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>上传简历（PDF/Word，10MB以内）<span class="req">*</span></label>
+        <div class="file-upload" id="resumeDropZone">
+          <input type="file" id="resumeFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp,.heic,.heif" hidden>
+          <label for="resumeFile" class="file-btn">点击选择文件</label>
+          <p class="file-hint" id="uploadStatus">或将文件拖放到此处</p>
+        </div>
+        <input type="hidden" name="resume_url" id="resumeUrlInput">
+        <div class="resume-status" id="resumeStatus" style="display:none"></div>
+      </div>
+
+      <button type="submit" id="submitBtn">提交申请</button>
+      <p style="text-align:center;margin-top:12px;font-size:.8rem;color:#888">提交即授权 Sunwood 收集并评估您的求职信息</p>
+    </form>
+  </div>
+
+  <footer>
+    <p>© 2026 Sunwood Consulting Group. All rights reserved.</p>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+
+    const STORAGE_KEY = 'sunwoodCandidateProfile';
+    const REQUIRED_FIELDS = ['name_cn', 'email', 'phone', 'current_job_title', 'total_work_years'];
+
+    let currentProfile = null;
+    let currentFile = null;
+    let isOneClickMode = false;
+
+    function getParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+
+    const jobId = getParam('job_id');
+    const jobTitle = decodeURIComponent(getParam('title') || '该职位');
+    const companyName = decodeURIComponent(getParam('company') || '');
+
+    document.getElementById('jobIdInput').value = jobId || '';
+    document.getElementById('jobBanner').innerHTML =
+      '<h2>申请：' + escapeHtml(jobTitle) + '</h2>' +
+      (companyName ? '<p>' + escapeHtml(companyName) + '</p>' : '');
+
+    const dropZone = document.getElementById('resumeDropZone');
+    const uploadStatus = document.getElementById('uploadStatus');
+    const resumeStatus = document.getElementById('resumeStatus');
+    const resumeUrlInput = document.getElementById('resumeUrlInput');
+    const profileBanner = document.getElementById('profileBanner');
+    const profileText = document.getElementById('profileText');
+    const oneClickBtn = document.getElementById('oneClickBtn');
+    const clearProfileBtn = document.getElementById('clearProfileBtn');
+    const lookupBtn = document.getElementById('lookupBtn');
+    const emailInput = document.getElementById('emailInput');
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showMsg(text, type) {
+      const msg = document.getElementById('msg');
+      msg.style.display = 'block';
+      msg.className = 'message ' + type;
+      msg.textContent = text;
+    }
+
+    function clearMsg() {
+      const msg = document.getElementById('msg');
+      msg.style.display = 'none';
+      msg.textContent = '';
+    }
+
+    function setResumeStatus(text, url) {
+      if (!text) {
+        resumeStatus.style.display = 'none';
+        return;
+      }
+      resumeStatus.style.display = 'block';
+      resumeStatus.innerHTML = text + (url ? ' <a href="' + escapeHtml(url) + '" target="_blank" style="color:#1e3a5f;text-decoration:underline">查看</a>' : '');
+    }
+
+    function handleFile(file) {
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) {
+        uploadStatus.innerHTML = '<span style="color:#dc2626">错误：文件超过10MB限制</span>';
+        currentFile = null;
+        document.getElementById('resumeFile').value = '';
+        return;
+      }
+      uploadStatus.innerHTML = '已选择：<b>' + escapeHtml(file.name) + '</b>';
+      currentFile = file;
+      resumeUrlInput.value = '';
+      setResumeStatus('新简历将在提交时上传');
+    }
+
+    document.getElementById('resumeFile').addEventListener('change', (e) => handleFile(e.target.files[0]));
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = '#2d5a87'; });
+    dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = '#cbd5e1'; });
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = '#cbd5e1';
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+
+    function getField(name) {
+      const el = document.querySelector('[name="' + name + '"]');
+      return el ? el.value.trim() : '';
+    }
+
+    function setField(name, value) {
+      const el = document.querySelector('[name="' + name + '"]');
+      if (el) el.value = value || '';
+    }
+
+    function profileFromForm() {
+      const fields = ['name_cn','name_en','phone_country_code','phone','email','current_job_title','total_work_years','skills','current_country','recruiter_notes'];
+      const p = {};
+      fields.forEach(f => p[f] = getField(f));
+      p.resume_url = resumeUrlInput.value || (currentProfile && currentProfile.resume_url) || '';
+      return p;
+    }
+
+    function fillForm(profile) {
+      if (!profile) return;
+      setField('name_cn', profile.name_cn);
+      setField('name_en', profile.name_en);
+      setField('phone_country_code', profile.phone_country_code || '+61');
+      setField('phone', profile.phone);
+      setField('email', profile.email);
+      setField('current_job_title', profile.current_job_title);
+      setField('total_work_years', profile.total_work_years);
+      setField('skills', profile.skills);
+      setField('current_country', profile.current_country);
+      setField('recruiter_notes', profile.recruiter_notes);
+
+      const resumeUrl = profile.resume_url || (profile.document_urls && profile.document_urls.resume) || '';
+      resumeUrlInput.value = resumeUrl;
+      if (resumeUrl) {
+        setResumeStatus('已关联历史简历', resumeUrl);
+      } else {
+        setResumeStatus(null);
+      }
+    }
+
+    function isProfileComplete(profile) {
+      if (!profile) return false;
+      for (const f of REQUIRED_FIELDS) {
+        if (!profile[f]) return false;
+      }
+      const resumeUrl = profile.resume_url || (profile.document_urls && profile.document_urls.resume);
+      return !!resumeUrl;
+    }
+
+    function saveProfileLocal(profile) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+      } catch (e) { /* ignore */ }
+    }
+
+    function loadProfileLocal() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
+    }
+
+    function clearProfileLocal() {
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
+    }
+
+    function showProfileBanner(profile, sourceText) {
+      currentProfile = profile;
+      const complete = isProfileComplete(profile);
+      profileBanner.style.display = 'block';
+      profileText.textContent = sourceText + (complete ? ' 资料完整，可直接一键申请。' : ' 资料已自动填充，请检查并补充完整。');
+      oneClickBtn.style.display = complete ? 'inline-block' : 'none';
+      clearProfileBtn.style.display = 'inline-block';
+    }
+
+    function hideProfileBanner() {
+      currentProfile = null;
+      profileBanner.style.display = 'none';
+      oneClickBtn.style.display = 'none';
+      clearProfileBtn.style.display = 'none';
+    }
+
+    async function findProfileById(id) {
+      const { data, error } = await supabaseClient
+        .from('candidate_assessments')
+        .select('*')
+        .eq('id', id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      if (error || !data) return null;
+      return data;
+    }
+
+    async function findProfileByEmail(email) {
+      if (!email || !email.includes('@')) return null;
+      const { data, error } = await supabaseClient
+        .from('candidate_assessments')
+        .select('*')
+        .eq('email', email)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      if (error || !data) return null;
+      return data;
+    }
+
+    async function initProfile() {
+      clearMsg();
+      const candidateId = getParam('candidate_id');
+
+      if (candidateId) {
+        const profile = await findProfileById(candidateId);
+        if (profile) {
+          fillForm(profile);
+          showProfileBanner(profile, '已通过链接加载您的历史资料。');
+          saveProfileLocal(profile);
+          return;
+        }
+      }
+
+      let localProfile = loadProfileLocal();
+      if (localProfile && localProfile.email) {
+        // 如果本地缓存没有数据库 ID，尝试反查邮箱获取最新记录，避免重复创建候选人
+        if (!localProfile.id) {
+          const dbProfile = await findProfileByEmail(localProfile.email);
+          if (dbProfile) {
+            localProfile = { ...dbProfile, resume_url: dbProfile.resume_url || (dbProfile.document_urls && dbProfile.document_urls.resume) || localProfile.resume_url };
+            saveProfileLocal(localProfile);
+          }
+        }
+        fillForm(localProfile);
+        showProfileBanner(localProfile, '已从本机恢复您的资料。');
+        return;
+      }
+
+      hideProfileBanner();
+    }
+
+    lookupBtn.addEventListener('click', async () => {
+      const email = emailInput.value.trim();
+      if (!email || !email.includes('@')) {
+        showMsg('请输入有效邮箱后再查找', 'error');
+        return;
+      }
+      clearMsg();
+      lookupBtn.disabled = true;
+      lookupBtn.textContent = '查找中...';
+      const profile = await findProfileByEmail(email);
+      lookupBtn.disabled = false;
+      lookupBtn.textContent = '查找我的资料';
+      if (profile) {
+        fillForm(profile);
+        showProfileBanner(profile, '已找到您的历史资料。');
+        saveProfileLocal(profile);
+      } else {
+        hideProfileBanner();
+        showMsg('未找到该邮箱的历史资料，请完整填写申请表。', 'info');
+      }
+    });
+
+    emailInput.addEventListener('blur', () => {
+      const email = emailInput.value.trim();
+      if (email && email.includes('@') && (!currentProfile || currentProfile.email !== email)) {
+        lookupBtn.click();
+      }
+    });
+
+    clearProfileBtn.addEventListener('click', () => {
+      clearProfileLocal();
+      hideProfileBanner();
+      document.getElementById('applyForm').reset();
+      resumeUrlInput.value = '';
+      uploadStatus.innerHTML = '或将文件拖放到此处';
+      currentFile = null;
+      setResumeStatus(null);
+      showMsg('已清除自动填充，请重新填写。', 'info');
+    });
+
+    async function uploadResumeIfNeeded() {
+      if (currentFile) {
+        const fileName = 'resume_' + Date.now() + '_' + currentFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const { error: uploadError } = await supabaseClient
+          .storage.from('resumes').upload(fileName, currentFile, { contentType: currentFile.type });
+        if (uploadError) throw new Error('简历上传失败：' + uploadError.message);
+        const { data: urlData } = supabaseClient.storage.from('resumes').getPublicUrl(fileName);
+        return urlData.publicUrl;
+      }
+      const existing = resumeUrlInput.value || (currentProfile && (currentProfile.resume_url || (currentProfile.document_urls && currentProfile.document_urls.resume)));
+      if (existing) return existing;
+      throw new Error('请上传简历');
+    }
+
+    function buildCandidateData(profile, resumeUrl) {
+      const data = { ...profile };
+      data.source = '官网职位申请';
+      data.owner = '待分配';
+      data.is_active = true;
+      data.document_urls = resumeUrl ? { resume: resumeUrl } : (data.document_urls || {});
+      delete data.resume_url;
+      delete data.id;
+      delete data.created_at;
+      delete data.updated_at;
+      return data;
+    }
+
+    async function submitApplication(candidateData, resumeUrl) {
+      let candidateId = currentProfile ? currentProfile.id : null;
+
+      if (candidateId) {
+        const updateData = buildCandidateData(candidateData, resumeUrl);
+        const { error: updateError } = await supabaseClient
+          .from('candidate_assessments')
+          .update(updateData)
+          .eq('id', candidateId);
+        if (updateError) throw new Error('更新候选人资料失败：' + updateError.message);
+      } else {
+        const insertData = buildCandidateData(candidateData, resumeUrl);
+        const { data: candidate, error: insertError } = await supabaseClient
+          .from('candidate_assessments')
+          .insert([insertData])
+          .select()
+          .single();
+        if (insertError) throw new Error('提交失败：' + insertError.message);
+        candidateId = candidate.id;
+        currentProfile = { ...insertData, id: candidateId, resume_url: resumeUrl };
+      }
+
+      const { error: appError } = await supabaseClient.from('applications').insert([{
+        job_id: jobId,
+        candidate_id: candidateId,
+        candidate_name: candidateData.name_cn || candidateData.name_en || '',
+        email: candidateData.email || '',
+        phone: candidateData.phone || null,
+        phone_country_code: candidateData.phone_country_code || null,
+        current_location: candidateData.current_country || null,
+        resume_url: resumeUrl || null,
+        document_urls: resumeUrl ? { resume: resumeUrl } : {},
+        cover_letter: candidateData.recruiter_notes || null,
+        status: 'sourced',
+        source: '官网职位申请',
+        owner: '待分配',
+        recruiter_id: '待分配'
+      }]);
+
+      if (appError) throw new Error('申请记录创建失败：' + appError.message);
+
+      return candidateId;
+    }
+
+    async function doSubmit(isOneClick) {
+      if (!jobId) {
+        showMsg('职位信息缺失，请从职位列表进入申请页面', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = isOneClick ? '一键申请中...' : '提交中...';
+      oneClickBtn.disabled = true;
+
+      try {
+        const candidateData = isOneClick && currentProfile
+          ? { ...currentProfile, recruiter_notes: getField('recruiter_notes') }
+          : profileFromForm();
+
+        if (!candidateData.name_cn || !candidateData.email || !candidateData.phone || !candidateData.current_job_title || !candidateData.total_work_years) {
+          throw new Error('请填写所有必填项');
+        }
+
+        const resumeUrl = await uploadResumeIfNeeded();
+        await submitApplication(candidateData, resumeUrl);
+
+        // 保存/更新本地缓存
+        const savedProfile = { ...candidateData, id: currentProfile ? currentProfile.id : null, resume_url: resumeUrl };
+        saveProfileLocal(savedProfile);
+        currentProfile = savedProfile;
+
+        showMsg('申请提交成功！我们的顾问将在3个工作日内与您联系。', 'success');
+        if (isOneClick) {
+          showProfileBanner(savedProfile, '资料已保存。');
+        } else {
+          document.getElementById('applyForm').reset();
+          uploadStatus.innerHTML = '或将文件拖放到此处';
+          currentFile = null;
+          setResumeStatus(null);
+          fillForm(savedProfile);
+          showProfileBanner(savedProfile, '资料已保存，可申请下一个职位。');
+        }
+      } catch (err) {
+        showMsg(err.message, 'error');
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+        oneClickBtn.disabled = false;
+      }
+    }
+
+    document.getElementById('applyForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      doSubmit(false);
+    });
+
+    oneClickBtn.addEventListener('click', () => {
+      doSubmit(true);
+    });
+
+    initProfile();
+  </script>
+</body>
+</html>

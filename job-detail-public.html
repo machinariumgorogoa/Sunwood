@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>职位详情 - Sunwood Consulting</title>
+  <script src="supabase.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
+    .container{max-width:800px;margin:0 auto;padding:20px}
+    header{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border-radius:0 0 20px 20px;margin-bottom:30px}
+    header h1{font-size:1.8rem;font-weight:600;margin-bottom:8px;letter-spacing:1px}
+    header p{opacity:.9;font-size:.95rem}
+    .job-detail{background:#fff;padding:30px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .job-header{margin-bottom:25px;padding-bottom:20px;border-bottom:2px solid #e5e7eb}
+    .job-header h2{color:#1e3a5f;font-size:1.5rem;margin-bottom:10px}
+    .job-company{font-size:1.1rem;color:#444;font-weight:600;margin-bottom:12px}
+    .job-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:15px}
+    .job-meta span{background:#f1f5f9;padding:5px 12px;border-radius:20px;font-size:.85rem;color:#555}
+    .job-salary{color:#1e3a5f;font-weight:600;font-size:1.1rem;margin-bottom:15px}
+    .job-section{margin-bottom:25px}
+    .job-section h3{color:#1e3a5f;font-size:1.1rem;margin-bottom:10px}
+    .job-section p{color:#555;line-height:1.7;white-space:pre-line}
+    .job-section ul{margin-left:20px;color:#555}
+    .job-section li{margin-bottom:6px}
+    .apply-btn{display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border-radius:10px;text-decoration:none;font-weight:600;font-size:1rem;transition:opacity .2s}
+    .apply-btn:hover{opacity:.9}
+    .back-link{display:inline-block;margin-top:20px;color:#1e3a5f;text-decoration:none;font-size:.9rem}
+    .back-link:hover{text-decoration:underline}
+    .empty{text-align:center;padding:50px;color:#888}
+    footer{text-align:center;padding:30px;color:#999;font-size:.8rem}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SUNWOOD CONSULTING</h1>
+    <p>Future Management Consulting · Migration and Recruitment Service</p>
+  </header>
+
+  <div class="container">
+    <div id="jobDetail">
+      <p class="empty">加载中...</p>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 Sunwood Consulting Group. All rights reserved.</p>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+
+    function getParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    async function loadJob() {
+      const jobId = getParam('id');
+      const container = document.getElementById('jobDetail');
+
+      if (!jobId) {
+        container.innerHTML = '<p class="empty">缺少职位 ID</p>';
+        return;
+      }
+
+      const { data, error } = await supabaseClient
+        .from('jobs')
+        .select('*')
+        .eq('id', jobId)
+        .eq('is_public', true)
+        .single();
+
+      if (error || !data) {
+        container.innerHTML = '<p class="empty">职位不存在或已下架</p>';
+        return;
+      }
+
+      const job = data;
+      const req = job.requirements || {};
+      const salary = job.salary_min || job.salary_max
+        ? `$${job.salary_min || ''}${job.salary_max ? ' - $' + job.salary_max : '+'} ${job.currency || 'AUD'}`
+        : '薪资面议';
+
+      let reqHtml = '';
+      if (req.skills || req.experience || req.language || req.visa) {
+        reqHtml = '<div class="job-section"><h3>职位要求</h3><ul>';
+        if (req.skills) reqHtml += '<li><strong>技能：</strong>' + escapeHtml(req.skills) + '</li>';
+        if (req.experience) reqHtml += '<li><strong>经验：</strong>' + escapeHtml(req.experience) + '</li>';
+        if (req.language) reqHtml += '<li><strong>语言：</strong>' + escapeHtml(req.language) + '</li>';
+        if (req.visa) reqHtml += '<li><strong>签证/身份：</strong>' + escapeHtml(req.visa) + '</li>';
+        reqHtml += '</ul></div>';
+      }
+
+      container.innerHTML =
+        '<div class="job-detail">' +
+          '<div class="job-header">' +
+            '<h2>' + escapeHtml(job.title) + '</h2>' +
+            '<div class="job-company">' + escapeHtml(job.company_name || 'Sunwood 合作雇主') + '</div>' +
+            '<div class="job-meta">' +
+              '<span>' + escapeHtml(job.category || '') + '</span>' +
+              '<span>' + escapeHtml(job.level || '') + '</span>' +
+              '<span>' + escapeHtml(job.work_type || '') + '</span>' +
+              '<span>' + escapeHtml(job.location || '') + '</span>' +
+            '</div>' +
+            '<div class="job-salary">' + escapeHtml(salary) + '</div>' +
+          '</div>' +
+          '<div class="job-section">' +
+            '<h3>职位描述</h3>' +
+            '<p>' + escapeHtml(job.description || '暂无描述') + '</p>' +
+          '</div>' +
+          reqHtml +
+          '<a class="apply-btn" href="job-apply.html?job_id=' + job.id + '&title=' + encodeURIComponent(job.title) + '&company=' + encodeURIComponent(job.company_name || '') + '">申请该职位</a>' +
+          '<br><a class="back-link" href="jobs-public.html">← 返回职位列表</a>' +
+        '</div>';
+    }
+
+    loadJob();
+  </script>
+</body>
+</html>

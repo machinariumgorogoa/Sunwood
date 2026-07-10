@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>发布职位 - Sunwood Consulting</title>
+  <script src="supabase.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
+    .container{max-width:800px;margin:0 auto;padding:20px}
+    header{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border-radius:0 0 20px 20px;margin-bottom:30px}
+    header h1{font-size:1.8rem;font-weight:600;margin-bottom:8px;letter-spacing:1px}
+    header p{opacity:.9;font-size:.95rem}
+    .intro{background:#fff;padding:25px;border-radius:12px;margin-bottom:25px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .intro h2{color:#1e3a5f;font-size:1.2rem;margin-bottom:12px}
+    form{background:#fff;padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .form-group{margin-bottom:18px}
+    label{display:block;font-weight:600;color:#444;margin-bottom:6px;font-size:.9rem}
+    input[type="text"],input[type="email"],input[type="tel"],input[type="date"],input[type="number"],select,textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:.9rem;transition:border .2s}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:#2d5a87}
+    textarea{min-height:80px;resize:vertical}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    @media(max-width:600px){.row{grid-template-columns:1fr}}
+    .checkbox-group{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+    .checkbox-group label{font-weight:400;display:flex;align-items:center;gap:4px;cursor:pointer;font-size:.9rem;color:#555}
+    .section-title{font-size:1.05rem;font-weight:700;color:#1e3a5f;margin:25px 0 15px;padding-bottom:8px;border-bottom:2px solid #e5e7eb}
+    .section-title:first-of-type{margin-top:0}
+    button[type="submit"]{width:100%;padding:14px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s;margin-top:10px}
+    button[type="submit"]:hover{opacity:.9}
+    button[type="submit"]:disabled{opacity:.5;cursor:not-allowed}
+    .message{padding:12px 15px;border-radius:8px;margin-bottom:20px;display:none;font-size:.9rem}
+    .message.success{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+    .message.error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+    .note{font-size:.8rem;color:#888;margin-top:4px}
+    footer{text-align:center;padding:30px;color:#999;font-size:.8rem}
+    .req{color:#dc2626;margin-left:2px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SUNWOOD CONSULTING</h1>
+    <p>Future Management Consulting · Migration and Recruitment Service</p>
+  </header>
+
+  <div class="container">
+    <div class="intro">
+      <h2>发布招聘职位</h2>
+      <p style="color:#555">填写职位信息，发布到官网职位列表供候选人申请。</p>
+    </div>
+
+    <div id="msg" class="message"></div>
+
+    <form id="jobForm">
+      <div class="section-title">职位基本信息</div>
+      <div class="row">
+        <div class="form-group">
+          <label>职位名称<span class="req">*</span></label>
+          <input type="text" name="title" placeholder="例如：行政助理 / 仓库主管" required>
+        </div>
+        <div class="form-group">
+          <label>公司名称<span class="req">*</span></label>
+          <input type="text" name="company_name" placeholder="例如：ABC Pty Ltd" required>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>职能分类<span class="req">*</span></label>
+          <select name="category" required>
+            <option value="">请选择</option>
+            <option>高管/领导层</option>
+            <option>行政/办公支持</option>
+            <option>财务/会计</option>
+            <option>销售/业务拓展</option>
+            <option>市场/品牌/公关</option>
+            <option>人力资源</option>
+            <option>信息技术</option>
+            <option>工程</option>
+            <option>建筑/技工</option>
+            <option>生产/运营</option>
+            <option>物流/仓储/供应链</option>
+            <option>医疗/养老护理</option>
+            <option>教育/培训</option>
+            <option>酒店/旅游/餐饮</option>
+            <option>零售/客户服务</option>
+            <option>法律</option>
+            <option>房地产/物业</option>
+            <option>农业/食品</option>
+            <option>其他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>职位级别<span class="req">*</span></label>
+          <select name="level" required>
+            <option value="">请选择</option>
+            <option>Junior / Entry</option>
+            <option>Mid-level</option>
+            <option>Senior</option>
+            <option>Executive / Leadership</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>工作类型<span class="req">*</span></label>
+          <select name="work_type" required>
+            <option value="">请选择</option>
+            <option>全职</option>
+            <option>兼职</option>
+            <option>合同工</option>
+            <option>临时工</option>
+            <option>实习</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>工作地点<span class="req">*</span></label>
+          <input type="text" name="location" placeholder="例如：悉尼 / 墨尔本 / Remote" required>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>最低年薪（AUD）</label>
+          <input type="number" name="salary_min" min="0" placeholder="例如：60000">
+        </div>
+        <div class="form-group">
+          <label>最高年薪（AUD）</label>
+          <input type="number" name="salary_max" min="0" placeholder="例如：75000">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>截止日期</label>
+          <input type="date" name="closing_date">
+        </div>
+        <div class="form-group">
+          <label>负责顾问<span class="req">*</span></label>
+          <input type="text" name="recruiter_id" placeholder="例如：Alice Zhang" required>
+        </div>
+      </div>
+
+      <div class="section-title">职位描述与要求</div>
+      <div class="form-group">
+        <label>职位描述<span class="req">*</span></label>
+        <textarea name="description" rows="5" placeholder="工作职责、团队介绍、公司文化等" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>技能要求</label>
+        <input type="text" name="skills_required" placeholder="例如：Excel, 库存管理, 中英文沟通，用逗号分隔">
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>经验要求</label>
+          <input type="text" name="experience_required" placeholder="例如：1-3年相关经验">
+        </div>
+        <div class="form-group">
+          <label>语言要求</label>
+          <input type="text" name="language_required" placeholder="例如：英语流利，中文优先">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>签证/身份要求</label>
+        <input type="text" name="visa_required" placeholder="例如：澳洲PR/公民，或持有有效工作签证">
+      </div>
+
+      <div class="section-title">发布设置</div>
+      <div class="row">
+        <div class="form-group">
+          <label>职位状态</label>
+          <select name="status">
+            <option value="招聘中" selected>招聘中</option>
+            <option value="暂停">暂停</option>
+            <option value="已关闭">已关闭</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>是否公开到官网</label>
+          <select name="is_public">
+            <option value="true" selected>公开</option>
+            <option value="false">不公开</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" id="submitBtn">发布职位</button>
+    </form>
+  </div>
+
+  <footer>
+    <p>© 2026 Sunwood Consulting Group. All rights reserved.</p>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+
+    function showMsg(text, type) {
+      const msg = document.getElementById('msg');
+      msg.style.display = 'block';
+      msg.className = 'message ' + type;
+      msg.textContent = text;
+    }
+
+    document.getElementById('jobForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = '发布中...';
+
+      const formData = new FormData(e.target);
+      const data = {};
+      formData.forEach((v, k) => { if (v !== '') data[k] = v; });
+
+      // 构建 requirements JSONB
+      data.requirements = {
+        skills: data.skills_required || null,
+        experience: data.experience_required || null,
+        language: data.language_required || null,
+        visa: data.visa_required || null
+      };
+      delete data.skills_required;
+      delete data.experience_required;
+      delete data.language_required;
+      delete data.visa_required;
+
+      // 布尔转换
+      data.is_public = data.is_public === 'true';
+
+      const { error } = await supabaseClient.from('jobs').insert([data]);
+
+      if (error) {
+        showMsg('发布失败：' + error.message, 'error');
+        console.error(error);
+      } else {
+        showMsg('职位发布成功！', 'success');
+        e.target.reset();
+      }
+
+      btn.disabled = false;
+      btn.textContent = '发布职位';
+    });
+  </script>
+</body>
+</html>
