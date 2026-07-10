@@ -181,13 +181,21 @@
     }
 
     const jobId = getParam('job_id');
-    const jobTitle = decodeURIComponent(getParam('title') || '该职位');
+    const mode = getParam('mode');
+    const jobTitle = decodeURIComponent(getParam('title') || '');
     const companyName = decodeURIComponent(getParam('company') || '');
+    const isProfileMode = !jobId || mode === 'profile';
 
     document.getElementById('jobIdInput').value = jobId || '';
-    document.getElementById('jobBanner').innerHTML =
-      '<h2>申请：' + escapeHtml(jobTitle) + '</h2>' +
-      (companyName ? '<p>' + escapeHtml(companyName) + '</p>' : '');
+    if (isProfileMode) {
+      document.getElementById('jobBanner').innerHTML =
+        '<h2>完善我的求职资料</h2>' +
+        '<p>填写一次资料，即可在职位列表一键申请多个职位</p>';
+    } else {
+      document.getElementById('jobBanner').innerHTML =
+        '<h2>申请：' + escapeHtml(jobTitle || '该职位') + '</h2>' +
+        (companyName ? '<p>' + escapeHtml(companyName) + '</p>' : '');
+    }
 
     const dropZone = document.getElementById('resumeDropZone');
     const uploadStatus = document.getElementById('uploadStatus');
@@ -459,26 +467,7 @@
     }
 
     async function submitApplication(candidateData, resumeUrl) {
-      let candidateId = currentProfile ? currentProfile.id : null;
-
-      if (candidateId) {
-        const updateData = buildCandidateData(candidateData, resumeUrl);
-        const { error: updateError } = await supabaseClient
-          .from('candidate_assessments')
-          .update(updateData)
-          .eq('id', candidateId);
-        if (updateError) throw new Error('更新候选人资料失败：' + updateError.message);
-      } else {
-        const insertData = buildCandidateData(candidateData, resumeUrl);
-        const { data: candidate, error: insertError } = await supabaseClient
-          .from('candidate_assessments')
-          .insert([insertData])
-          .select()
-          .single();
-        if (insertError) throw new Error('提交失败：' + insertError.message);
-        candidateId = candidate.id;
-        currentProfile = { ...insertData, id: candidateId, resume_url: resumeUrl };
-      }
+      const candidateId = await upsertCandidate(candidateData, resumeUrl);
 
       const { error: appError } = await supabaseClient.from('applications').insert([{
         job_id: jobId,
@@ -502,12 +491,65 @@
       return candidateId;
     }
 
-    async function doSubmit(isOneClick) {
-      if (!jobId) {
-        showMsg('职位信息缺失，请从职位列表进入申请页面', 'error');
-        return;
-      }
+    function setSubmitButtonText(text) {
+      document.getElementById('submitBtn').textContent = text;
+    }
 
+    if (isProfileMode) {
+      setSubmitButtonText('保存资料');
+      oneClickBtn.style.display = 'none';
+    }
+
+    async function doSaveProfile() {
+      const btn = document.getElementById('submitBtn');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '保存中...';
+      oneClickBtn.disabled = true;
+
+      try {
+        const candidateData = profileFromForm();
+        if (!candidateData.name_cn || !candidateData.email || !candidateData.phone || !candidateData.current_job_title || !candidateData.total_work_years) {
+          throw new Error('请填写所有必填项');
+        }
+        const resumeUrl = await uploadResumeIfNeeded();
+        const candidateId = await upsertCandidate(candidateData, resumeUrl);
+
+        const savedProfile = { ...candidateData, id: candidateId, resume_url: resumeUrl };
+        saveProfileLocal(savedProfile);
+        currentProfile = savedProfile;
+
+        showMsg('资料保存成功！您可以返回职位列表一键申请多个职位。', 'success');
+        showProfileBanner(savedProfile, '资料已保存。');
+      } catch (err) {
+        showMsg(err.message, 'error');
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+        oneClickBtn.disabled = false;
+      }
+    }
+
+    async function upsertCandidate(candidateData, resumeUrl) {
+      const data = buildCandidateData(candidateData, resumeUrl);
+      if (currentProfile && currentProfile.id) {
+        const { error } = await supabaseClient.from('candidate_assessments').update(data).eq('id', currentProfile.id);
+        if (error) throw new Error('更新候选人资料失败：' + error.message);
+        return currentProfile.id;
+      }
+      const existing = await findProfileByEmail(data.email);
+      if (existing) {
+        const { error } = await supabaseClient.from('candidate_assessments').update(data).eq('id', existing.id);
+        if (error) throw new Error('更新候选人资料失败：' + error.message);
+        return existing.id;
+      }
+      const { data: inserted, error } = await supabaseClient.from('candidate_assessments').insert([data]).select().single();
+      if (error) throw new Error('创建候选人资料失败：' + error.message);
+      return inserted.id;
+    }
+
+    async function doSubmit(isOneClick) {
       const btn = document.getElementById('submitBtn');
       const originalText = btn.textContent;
       btn.disabled = true;
@@ -524,10 +566,10 @@
         }
 
         const resumeUrl = await uploadResumeIfNeeded();
-        await submitApplication(candidateData, resumeUrl);
+        const candidateId = await submitApplication(candidateData, resumeUrl);
 
         // 保存/更新本地缓存
-        const savedProfile = { ...candidateData, id: currentProfile ? currentProfile.id : null, resume_url: resumeUrl };
+        const savedProfile = { ...candidateData, id: candidateId, resume_url: resumeUrl };
         saveProfileLocal(savedProfile);
         currentProfile = savedProfile;
 
@@ -554,7 +596,11 @@
 
     document.getElementById('applyForm').addEventListener('submit', (e) => {
       e.preventDefault();
-      doSubmit(false);
+      if (isProfileMode) {
+        doSaveProfile();
+      } else {
+        doSubmit(false);
+      }
     });
 
     oneClickBtn.addEventListener('click', () => {

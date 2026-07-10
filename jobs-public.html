@@ -12,26 +12,40 @@
     header{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border-radius:0 0 20px 20px;margin-bottom:30px}
     header h1{font-size:1.8rem;font-weight:600;margin-bottom:8px;letter-spacing:1px}
     header p{opacity:.9;font-size:.95rem}
-    .filters{background:#fff;padding:20px;border-radius:12px;margin-bottom:25px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .filters{background:#fff;padding:20px;border-radius:12px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
     .filters h2{color:#1e3a5f;font-size:1.1rem;margin-bottom:15px}
     .filter-row{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}
     @media(max-width:768px){.filter-row{grid-template-columns:1fr 1fr}}
     @media(max-width:480px){.filter-row{grid-template-columns:1fr}}
     .filter-group label{font-size:.85rem;color:#666;margin-bottom:5px;display:block}
     .filter-group select{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:.9rem}
+    .apply-bar{background:#fff;padding:15px 20px;border-radius:12px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+    .apply-bar p{color:#555;font-size:.9rem}
+    .apply-bar .btn{padding:10px 20px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+    .apply-bar .btn:hover{opacity:.9}
+    .apply-bar .btn:disabled{opacity:.5;cursor:not-allowed}
+    .apply-bar a{color:#1e3a5f;text-decoration:underline;font-weight:600}
     .job-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
     @media(max-width:768px){.job-grid{grid-template-columns:1fr}}
-    .job-card{background:#fff;padding:22px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);transition:transform .2s,box-shadow .2s}
+    .job-card{background:#fff;padding:22px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);transition:transform .2s,box-shadow .2s;position:relative}
     .job-card:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,.1)}
-    .job-card h3{color:#1e3a5f;font-size:1.15rem;margin-bottom:8px}
+    .job-select{position:absolute;top:16px;right:16px;width:20px;height:20px;cursor:pointer}
+    .job-card h3{color:#1e3a5f;font-size:1.15rem;margin-bottom:8px;padding-right:30px}
     .job-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;font-size:.85rem;color:#666}
     .job-meta span{background:#f1f5f9;padding:4px 10px;border-radius:20px}
     .job-company{font-weight:600;color:#444;margin-bottom:8px}
     .job-desc{color:#555;font-size:.9rem;line-height:1.5;margin-bottom:15px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
     .job-salary{color:#1e3a5f;font-weight:600;font-size:.95rem;margin-bottom:15px}
-    .job-card a{display:inline-block;padding:8px 18px;background:#1e3a5f;color:#fff;border-radius:6px;text-decoration:none;font-size:.9rem;transition:opacity .2s}
-    .job-card a:hover{opacity:.9}
+    .job-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .job-actions a{display:inline-block;padding:8px 18px;background:#1e3a5f;color:#fff;border-radius:6px;text-decoration:none;font-size:.9rem;transition:opacity .2s}
+    .job-actions a:hover{opacity:.9}
+    .job-actions a.secondary{background:#fff;color:#1e3a5f;border:1.5px solid #1e3a5f}
+    .job-actions a.secondary:hover{background:#f1f5f9}
     .empty{text-align:center;padding:50px;color:#888}
+    .message{padding:12px 15px;border-radius:8px;margin-bottom:20px;display:none;font-size:.9rem}
+    .message.success{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+    .message.error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+    .message.info{background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe}
     footer{text-align:center;padding:30px;color:#999;font-size:.8rem}
   </style>
 </head>
@@ -101,6 +115,13 @@
       </div>
     </div>
 
+    <div class="apply-bar" id="applyBar" style="display:none">
+      <p id="applyBarText">已选择 0 个职位</p>
+      <button class="btn" id="oneClickApplyBtn">一键申请选中职位</button>
+    </div>
+
+    <div id="msg" class="message"></div>
+
     <div id="jobList">
       <p class="empty">加载中...</p>
     </div>
@@ -118,6 +139,9 @@
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: { persistSession: false, autoRefreshToken: false }
     });
+
+    const STORAGE_KEY = 'sunwoodCandidateProfile';
+    const REQUIRED_FIELDS = ['name_cn', 'email', 'phone', 'current_job_title', 'total_work_years'];
 
     let allJobs = [];
 
@@ -140,6 +164,7 @@
       allJobs = data || [];
       populateLocationFilter(allJobs);
       renderJobs(allJobs);
+      updateApplyBar();
     }
 
     function populateLocationFilter(jobs) {
@@ -153,20 +178,30 @@
       });
     }
 
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
     function renderJobs(jobs) {
       const container = document.getElementById('jobList');
+      const applyBar = document.getElementById('applyBar');
       if (!jobs || jobs.length === 0) {
         container.innerHTML = '<p class="empty">暂无公开招聘职位</p>';
+        applyBar.style.display = 'none';
         return;
       }
 
+      applyBar.style.display = 'flex';
       container.innerHTML = '<div class="job-grid">' +
         jobs.map(job => {
           const salary = job.salary_min || job.salary_max
             ? `$${job.salary_min || ''}${job.salary_max ? ' - $' + job.salary_max : '+'} ${job.currency || 'AUD'}`
             : '薪资面议';
-          const req = job.requirements || {};
           return '<div class="job-card">' +
+            '<input type="checkbox" class="job-select" value="' + job.id + '" data-title="' + escapeHtml(job.title) + '">' +
             '<h3>' + escapeHtml(job.title) + '</h3>' +
             '<div class="job-company">' + escapeHtml(job.company_name || 'Sunwood 合作雇主') + '</div>' +
             '<div class="job-meta">' +
@@ -177,18 +212,160 @@
             '</div>' +
             '<div class="job-desc">' + escapeHtml(job.description || '') + '</div>' +
             '<div class="job-salary">' + escapeHtml(salary) + '</div>' +
-            '<a href="job-detail-public.html?id=' + job.id + '">查看详情</a>' +
+            '<div class="job-actions">' +
+              '<a href="job-detail-public.html?id=' + job.id + '">查看详情</a>' +
+              '<a class="secondary" href="job-apply.html?job_id=' + job.id + '&title=' + encodeURIComponent(job.title) + '&company=' + encodeURIComponent(job.company_name || '') + '">申请该职位</a>' +
+            '</div>' +
           '</div>';
         }).join('') +
       '</div>';
+
+      document.querySelectorAll('.job-select').forEach(cb => {
+        cb.addEventListener('change', updateApplyBar);
+      });
     }
 
-    function escapeHtml(text) {
-      if (!text) return '';
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
+    function updateApplyBar() {
+      const selected = document.querySelectorAll('.job-select:checked');
+      document.getElementById('applyBarText').textContent = '已选择 ' + selected.length + ' 个职位';
+      document.getElementById('oneClickApplyBtn').disabled = selected.length === 0;
     }
+
+    function showMsg(text, type) {
+      const msg = document.getElementById('msg');
+      msg.style.display = 'block';
+      msg.className = 'message ' + type;
+      msg.innerHTML = text;
+    }
+
+    function loadProfileLocal() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
+    }
+
+    function isProfileComplete(profile) {
+      if (!profile) return false;
+      for (const f of REQUIRED_FIELDS) {
+        if (!profile[f]) return false;
+      }
+      const resumeUrl = profile.resume_url || (profile.document_urls && profile.document_urls.resume);
+      return !!resumeUrl;
+    }
+
+    async function findProfileByEmail(email) {
+      if (!email || !email.includes('@')) return null;
+      const { data, error } = await supabaseClient
+        .from('candidate_assessments')
+        .select('*')
+        .eq('email', email)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      if (error || !data) return null;
+      return data;
+    }
+
+    async function getCompleteProfile() {
+      let profile = loadProfileLocal();
+      if (profile && profile.email && !profile.id) {
+        const dbProfile = await findProfileByEmail(profile.email);
+        if (dbProfile) profile = dbProfile;
+      }
+      return profile;
+    }
+
+    async function upsertCandidate(profile) {
+      const data = {
+        name_cn: profile.name_cn,
+        name_en: profile.name_en || null,
+        phone_country_code: profile.phone_country_code || '+61',
+        phone: profile.phone,
+        email: profile.email,
+        current_job_title: profile.current_job_title,
+        total_work_years: profile.total_work_years,
+        skills: profile.skills || null,
+        current_country: profile.current_country || null,
+        recruiter_notes: profile.recruiter_notes || null,
+        document_urls: profile.document_urls || {},
+        source: '官网职位申请',
+        owner: '待分配',
+        is_active: true
+      };
+
+      if (profile.id) {
+        const { error } = await supabaseClient.from('candidate_assessments').update(data).eq('id', profile.id);
+        if (error) throw new Error('更新候选人资料失败：' + error.message);
+        return profile.id;
+      }
+
+      const existing = await findProfileByEmail(profile.email);
+      if (existing) {
+        const { error } = await supabaseClient.from('candidate_assessments').update(data).eq('id', existing.id);
+        if (error) throw new Error('更新候选人资料失败：' + error.message);
+        return existing.id;
+      }
+
+      const { data: inserted, error } = await supabaseClient.from('candidate_assessments').insert([data]).select().single();
+      if (error) throw new Error('创建候选人资料失败：' + error.message);
+      return inserted.id;
+    }
+
+    async function createApplications(candidateId, jobIds) {
+      const profile = loadProfileLocal();
+      const resumeUrl = profile && (profile.resume_url || (profile.document_urls && profile.document_urls.resume));
+      const rows = jobIds.map(jobId => ({
+        job_id: jobId,
+        candidate_id: candidateId,
+        candidate_name: profile.name_cn || profile.name_en || '',
+        email: profile.email || '',
+        phone: profile.phone || null,
+        phone_country_code: profile.phone_country_code || null,
+        current_location: profile.current_country || null,
+        resume_url: resumeUrl || null,
+        document_urls: resumeUrl ? { resume: resumeUrl } : {},
+        cover_letter: profile.recruiter_notes || null,
+        status: 'sourced',
+        source: '官网职位申请',
+        owner: '待分配',
+        recruiter_id: '待分配'
+      }));
+      const { error } = await supabaseClient.from('applications').insert(rows);
+      if (error) throw new Error('创建申请记录失败：' + error.message);
+    }
+
+    document.getElementById('oneClickApplyBtn').addEventListener('click', async () => {
+      const selected = Array.from(document.querySelectorAll('.job-select:checked')).map(cb => cb.value);
+      if (selected.length === 0) return;
+
+      const profile = await getCompleteProfile();
+      if (!isProfileComplete(profile)) {
+        showMsg('您的资料还不完整，无法一键申请。<a href="job-apply.html?mode=profile">请先完善求职资料 →</a>', 'info');
+        return;
+      }
+
+      const titles = Array.from(document.querySelectorAll('.job-select:checked')).map(cb => cb.dataset.title);
+      if (!confirm('确认一键申请以下 ' + selected.length + ' 个职位？\n\n' + titles.join('\n'))) return;
+
+      const btn = document.getElementById('oneClickApplyBtn');
+      btn.disabled = true;
+      btn.textContent = '申请中...';
+
+      try {
+        const candidateId = await upsertCandidate(profile);
+        await createApplications(candidateId, selected);
+        showMsg('一键申请成功！我们的顾问将在3个工作日内与您联系。', 'success');
+        document.querySelectorAll('.job-select:checked').forEach(cb => cb.checked = false);
+        updateApplyBar();
+      } catch (err) {
+        showMsg(err.message, 'error');
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '一键申请选中职位';
+      }
+    });
 
     function filterJobs() {
       const category = document.getElementById('categoryFilter').value;
@@ -204,6 +381,7 @@
       });
 
       renderJobs(filtered);
+      updateApplyBar();
     }
 
     ['categoryFilter', 'levelFilter', 'workTypeFilter', 'locationFilter'].forEach(id => {

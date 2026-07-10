@@ -116,7 +116,26 @@
         </div>
         <div class="form-group">
           <label>工作地点<span class="req">*</span></label>
-          <input type="text" name="location" placeholder="例如：悉尼 / 墨尔本 / Remote" required>
+          <select name="location" id="locationSelect" required>
+            <option value="">请选择</option>
+            <option>悉尼 Sydney</option>
+            <option>墨尔本 Melbourne</option>
+            <option>布里斯班 Brisbane</option>
+            <option>珀斯 Perth</option>
+            <option>阿德莱德 Adelaide</option>
+            <option>堪培拉 Canberra</option>
+            <option>达尔文 Darwin</option>
+            <option>霍巴特 Hobart</option>
+            <option>黄金海岸 Gold Coast</option>
+            <option>Newcastle</option>
+            <option>卧龙岗 Wollongong</option>
+            <option>吉朗 Geelong</option>
+            <option>凯恩斯 Cairns</option>
+            <option>汤斯维尔 Townsville</option>
+            <option>Remote / 远程</option>
+            <option value="__other__">其他</option>
+          </select>
+          <input type="text" name="location_other" id="locationOther" placeholder="请填写具体地点" style="display:none;margin-top:8px">
         </div>
       </div>
 
@@ -138,7 +157,14 @@
         </div>
         <div class="form-group">
           <label>负责顾问<span class="req">*</span></label>
-          <input type="text" name="recruiter_id" placeholder="例如：Alice Zhang" required>
+          <select name="recruiter_id" id="recruiterSelect" required>
+            <option value="">请选择</option>
+            <option>Alice Zhang</option>
+            <option>Bob Li</option>
+            <option>Carol Wang</option>
+            <option>David Chen</option>
+            <option>Emma Liu</option>
+          </select>
         </div>
       </div>
 
@@ -156,17 +182,46 @@
       <div class="row">
         <div class="form-group">
           <label>经验要求</label>
-          <input type="text" name="experience_required" placeholder="例如：1-3年相关经验">
+          <select name="experience_required">
+            <option value="">请选择</option>
+            <option>不限</option>
+            <option>1年以下</option>
+            <option>1-3年</option>
+            <option>3-5年</option>
+            <option>5-10年</option>
+            <option>10年以上</option>
+          </select>
         </div>
         <div class="form-group">
           <label>语言要求</label>
-          <input type="text" name="language_required" placeholder="例如：英语流利，中文优先">
+          <select name="language_required">
+            <option value="">请选择</option>
+            <option>英语流利</option>
+            <option>英语良好</option>
+            <option>中英文流利</option>
+            <option>中文优先</option>
+            <option>不限</option>
+          </select>
         </div>
       </div>
 
-      <div class="form-group">
-        <label>签证/身份要求</label>
-        <input type="text" name="visa_required" placeholder="例如：澳洲PR/公民，或持有有效工作签证">
+      <div class="row">
+        <div class="form-group">
+          <label>学历要求</label>
+          <select name="education_required">
+            <option value="">请选择</option>
+            <option>不限</option>
+            <option>高中及以下</option>
+            <option>大专</option>
+            <option>本科</option>
+            <option>硕士</option>
+            <option>博士</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>签证/身份要求</label>
+          <input type="text" name="visa_required" placeholder="例如：澳洲PR/公民，或持有有效工作签证">
+        </div>
       </div>
 
       <div class="section-title">发布设置</div>
@@ -212,6 +267,12 @@
       msg.textContent = text;
     }
 
+    document.getElementById('locationSelect').addEventListener('change', function () {
+      const other = document.getElementById('locationOther');
+      other.style.display = this.value === '__other__' ? 'block' : 'none';
+      if (this.value !== '__other__') other.value = '';
+    });
+
     document.getElementById('jobForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('submitBtn');
@@ -222,16 +283,24 @@
       const data = {};
       formData.forEach((v, k) => { if (v !== '') data[k] = v; });
 
+      // 处理工作地点「其他」
+      if (data.location === '__other__') {
+        data.location = data.location_other || '其他';
+      }
+      delete data.location_other;
+
       // 构建 requirements JSONB
       data.requirements = {
         skills: data.skills_required || null,
         experience: data.experience_required || null,
         language: data.language_required || null,
+        education: data.education_required || null,
         visa: data.visa_required || null
       };
       delete data.skills_required;
       delete data.experience_required;
       delete data.language_required;
+      delete data.education_required;
       delete data.visa_required;
 
       // 布尔转换

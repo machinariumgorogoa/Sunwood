@@ -51,7 +51,7 @@
   <script src="nav.js"></script>
   <script>
     const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
 
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: { persistSession: false, autoRefreshToken: false }
@@ -97,11 +97,12 @@
         : '薪资面议';
 
       let reqHtml = '';
-      if (req.skills || req.experience || req.language || req.visa) {
+      if (req.skills || req.experience || req.language || req.education || req.visa) {
         reqHtml = '<div class="job-section"><h3>职位要求</h3><ul>';
-        if (req.skills) reqHtml += '<li><strong>技能：</strong>' + escapeHtml(req.skills) + '</li>';
+        if (req.education) reqHtml += '<li><strong>学历：</strong>' + escapeHtml(req.education) + '</li>';
         if (req.experience) reqHtml += '<li><strong>经验：</strong>' + escapeHtml(req.experience) + '</li>';
         if (req.language) reqHtml += '<li><strong>语言：</strong>' + escapeHtml(req.language) + '</li>';
+        if (req.skills) reqHtml += '<li><strong>技能：</strong>' + escapeHtml(req.skills) + '</li>';
         if (req.visa) reqHtml += '<li><strong>签证/身份：</strong>' + escapeHtml(req.visa) + '</li>';
         reqHtml += '</ul></div>';
       }
