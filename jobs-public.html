@@ -197,13 +197,9 @@
       applyBar.style.display = 'flex';
       container.innerHTML = '<div class="job-grid">' +
         jobs.map(job => {
-          const salary = job.salary_min || job.salary_max
-            ? `$${job.salary_min || ''}${job.salary_max ? ' - $' + job.salary_max : '+'} ${job.currency || 'AUD'}`
-            : '薪资面议';
           return '<div class="job-card">' +
             '<input type="checkbox" class="job-select" value="' + job.id + '" data-title="' + escapeHtml(job.title) + '">' +
             '<h3>' + escapeHtml(job.title) + '</h3>' +
-            '<div class="job-company">' + escapeHtml(job.company_name || 'Sunwood 合作雇主') + '</div>' +
             '<div class="job-meta">' +
               '<span>' + escapeHtml(job.category || '') + '</span>' +
               '<span>' + escapeHtml(job.level || '') + '</span>' +
@@ -211,10 +207,9 @@
               '<span>' + escapeHtml(job.location || '') + '</span>' +
             '</div>' +
             '<div class="job-desc">' + escapeHtml(job.description || '') + '</div>' +
-            '<div class="job-salary">' + escapeHtml(salary) + '</div>' +
             '<div class="job-actions">' +
               '<a href="job-detail-public.html?id=' + job.id + '">查看详情</a>' +
-              '<a class="secondary" href="job-apply.html?job_id=' + job.id + '&title=' + encodeURIComponent(job.title) + '&company=' + encodeURIComponent(job.company_name || '') + '">申请该职位</a>' +
+              '<a class="secondary" href="job-apply.html?job_id=' + job.id + '&title=' + encodeURIComponent(job.title) + '">申请该职位</a>' +
             '</div>' +
           '</div>';
         }).join('') +
