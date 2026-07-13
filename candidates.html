@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>候选人库 - Sunwood Consulting</title>
+  <script src="supabase.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
+    .container{max-width:1200px;margin:0 auto;padding:20px}
+    header{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border-radius:0 0 20px 20px;margin-bottom:30px}
+    header h1{font-size:1.8rem;font-weight:600;margin-bottom:8px;letter-spacing:1px}
+    header p{opacity:.9;font-size:.95rem}
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:15px;margin-bottom:25px}
+    .stat-card{background:#fff;padding:18px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:center}
+    .stat-card .number{font-size:1.8rem;font-weight:700;color:#1e3a5f}
+    .stat-card .label{font-size:.85rem;color:#666;margin-top:4px}
+    .filters{background:#fff;padding:20px;border-radius:12px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .filters h2{color:#1e3a5f;font-size:1.1rem;margin-bottom:15px}
+    .filter-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px}
+    .filter-group label{font-size:.85rem;color:#666;margin-bottom:5px;display:block}
+    .filter-group input,.filter-group select{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:.9rem}
+    .table-wrap{overflow-x:auto;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    table{width:100%;border-collapse:collapse;font-size:.9rem}
+    th,td{padding:12px;text-align:left;border-bottom:1px solid #eee}
+    th{background:#f8fafc;color:#1e3a5f;font-weight:600}
+    td{color:#555}
+    tr:hover{background:#f8fafc}
+    .tag{display:inline-block;background:#e0f2fe;color:#1e40af;padding:2px 8px;border-radius:12px;font-size:.75rem;margin-right:4px;margin-bottom:4px}
+    .empty{text-align:center;padding:50px;color:#888}
+    footer{text-align:center;padding:30px;color:#999;font-size:.8rem}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SUNWOOD CONSULTING</h1>
+    <p>Future Management Consulting · Migration and Recruitment Service</p>
+  </header>
+
+  <div class="container">
+    <div class="stats" id="stats">
+      <div class="stat-card"><div class="number" id="statTotal">-</div><div class="label">全部候选人</div></div>
+      <div class="stat-card"><div class="number" id="statActive">-</div><div class="label">求职中</div></div>
+      <div class="stat-card"><div class="number" id="statRecent">-</div><div class="label">近 30 天新增</div></div>
+    </div>
+
+    <div class="filters">
+      <h2 id="filterTitle">筛选候选人</h2>
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>搜索姓名/邮箱/手机号/技能</label>
+          <input type="text" id="searchInput" placeholder="输入关键词">
+        </div>
+        <div class="filter-group">
+          <label>来源</label>
+          <select id="sourceFilter"><option value="">全部</option></select>
+        </div>
+        <div class="filter-group">
+          <label>归属顾问</label>
+          <select id="ownerFilter"><option value="">全部</option></select>
+        </div>
+        <div class="filter-group">
+          <label>当前所在地</label>
+          <select id="locationFilter"><option value="">全部</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table id="candidatesTable">
+        <thead>
+          <tr>
+            <th>姓名</th>
+            <th>联系方式</th>
+            <th>当前职位 / 年限</th>
+            <th>所在地</th>
+            <th>技能</th>
+            <th>来源</th>
+            <th>归属</th>
+            <th>申请职位数</th>
+            <th>提交时间</th>
+          </tr>
+        </thead>
+        <tbody id="candidatesBody">
+          <tr><td colspan="9" class="empty">加载中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 Sunwood Consulting Group. All rights reserved.</p>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+
+    function getParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+
+    const jobIdFilter = getParam('job_id');
+    let allCandidates = [];
+    let allApplications = [];
+
+    async function loadData() {
+      const tbody = document.getElementById('candidatesBody');
+      tbody.innerHTML = '<tr><td colspan="9" class="empty">加载中...</td></tr>';
+
+      let appsQuery = supabaseClient.from('applications').select('id,candidate_id,job_id,status');
+      if (jobIdFilter) {
+        appsQuery = appsQuery.eq('job_id', jobIdFilter);
+        document.getElementById('filterTitle').textContent = '该职位的申请人';
+      }
+
+      const [{ data: candidates, error: candError }, { data: apps, error: appsError }] = await Promise.all([
+        supabaseClient.from('candidate_assessments').select('*').order('created_at', { ascending: false }),
+        appsQuery
+      ]);
+
+      if (candError) {
+        tbody.innerHTML = '<tr><td colspan="9" class="empty">加载失败：' + candError.message + '</td></tr>';
+        return;
+      }
+
+      allCandidates = candidates || [];
+      allApplications = apps || [];
+
+      // 如果按职位筛选，只保留有申请该职位的候选人
+      if (jobIdFilter) {
+        const candidateIds = [...new Set(allApplications.map(a => a.candidate_id).filter(Boolean))];
+        allCandidates = allCandidates.filter(c => candidateIds.includes(c.id));
+      }
+
+      updateStats();
+      populateFilters();
+      renderCandidates(allCandidates);
+    }
+
+    function updateStats() {
+      document.getElementById('statTotal').textContent = allCandidates.length;
+      document.getElementById('statActive').textContent = allCandidates.filter(c => c.is_active !== false).length;
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      document.getElementById('statRecent').textContent = allCandidates.filter(c => c.created_at && new Date(c.created_at) > thirtyDaysAgo).length;
+    }
+
+    function populateFilters() {
+      const sources = [...new Set(allCandidates.map(c => c.source).filter(Boolean))].sort();
+      const owners = [...new Set(allCandidates.map(c => c.owner).filter(Boolean))].sort();
+      const locations = [...new Set(allCandidates.map(c => c.current_country).filter(Boolean))].sort();
+
+      fillSelect('sourceFilter', sources);
+      fillSelect('ownerFilter', owners);
+      fillSelect('locationFilter', locations);
+    }
+
+    function fillSelect(id, values) {
+      const sel = document.getElementById(id);
+      const current = sel.value;
+      sel.innerHTML = '<option value="">全部</option>';
+      values.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        sel.appendChild(opt);
+      });
+      sel.value = current;
+    }
+
+    function getApplicationCount(candidateId) {
+      return allApplications.filter(a => a.candidate_id === candidateId).length;
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '-';
+      const d = new Date(iso);
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function renderSkillTags(skills) {
+      if (!skills) return '-';
+      return skills.split(/[,，]/).map(s => s.trim()).filter(Boolean).map(s =>
+        '<span class="tag">' + escapeHtml(s) + '</span>'
+      ).join('');
+    }
+
+    function renderCandidates(candidates) {
+      const tbody = document.getElementById('candidatesBody');
+      if (!candidates || candidates.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="empty">暂无候选人</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = candidates.map(c => {
+        const count = getApplicationCount(c.id);
+        const phone = [c.phone_country_code, c.phone].filter(Boolean).join(' ');
+        return '<tr>' +
+          '<td><strong>' + escapeHtml(c.name_cn || '-') + '</strong>' + (c.name_en ? '<br><span style="color:#888;font-size:.8rem">' + escapeHtml(c.name_en) + '</span>' : '') + '</td>' +
+          '<td>' + escapeHtml(c.email || '-') + '<br><span style="color:#888;font-size:.8rem">' + escapeHtml(phone) + '</span></td>' +
+          '<td>' + escapeHtml(c.current_job_title || '-') + (c.total_work_years != null ? '<br><span style="color:#888;font-size:.8rem">' + c.total_work_years + ' 年经验</span>' : '') + '</td>' +
+          '<td>' + escapeHtml(c.current_country || '-') + '</td>' +
+          '<td>' + renderSkillTags(c.skills) + '</td>' +
+          '<td>' + escapeHtml(c.source || '-') + '</td>' +
+          '<td>' + escapeHtml(c.owner || '-') + '</td>' +
+          '<td>' + (count > 0 ? count + ' 个' : '0') + '</td>' +
+          '<td>' + formatDate(c.created_at) + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    function filterCandidates() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const source = document.getElementById('sourceFilter').value;
+      const owner = document.getElementById('ownerFilter').value;
+      const location = document.getElementById('locationFilter').value;
+
+      const filtered = allCandidates.filter(c => {
+        const matchSearch = !search ||
+          (c.name_cn || '').toLowerCase().includes(search) ||
+          (c.name_en || '').toLowerCase().includes(search) ||
+          (c.email || '').toLowerCase().includes(search) ||
+          (c.phone || '').includes(search) ||
+          (c.skills || '').toLowerCase().includes(search);
+        const matchSource = !source || c.source === source;
+        const matchOwner = !owner || c.owner === owner;
+        const matchLocation = !location || c.current_country === location;
+        return matchSearch && matchSource && matchOwner && matchLocation;
+      });
+
+      renderCandidates(filtered);
+    }
+
+    ['searchInput', 'sourceFilter', 'ownerFilter', 'locationFilter'].forEach(id => {
+      document.getElementById(id).addEventListener('input', filterCandidates);
+      document.getElementById(id).addEventListener('change', filterCandidates);
+    });
+
+    loadData();
+  </script>
+</body>
+</html>

@@ -58,9 +58,11 @@
     { label: '客户管理', href: 'clients.html' },
     { label: '公司管理', href: 'companies.html' },
     { label: '项目管理', href: 'projects.html' },
-    { label: '猎头招聘', href: 'jobs-public.html' },
+    { label: '招聘职位（官网）', href: 'jobs-public.html' },
     { label: '发布职位', href: 'job-form.html' },
-    { label: '人才库', href: 'assessment.html' },
+    { label: '职位管理', href: 'jobs-internal.html' },
+    { label: '候选人库', href: 'candidates.html' },
+    { label: '评估记录', href: 'assessment.html' },
     { label: '渠道管理', href: 'channels.html' },
     { label: '内部 AI 工具', href: 'ai-internal.html' },
     { label: '外部 AI 报告', href: 'ai-external.html' },
@@ -104,9 +106,11 @@
               '<a href="clients.html">客户管理</a>' +
               '<a href="companies.html">公司管理</a>' +
               '<a href="projects.html">项目管理</a>' +
-              '<a href="jobs-public.html">招聘职位</a>' +
+              '<a href="jobs-public.html">招聘职位（官网）</a>' +
               '<a href="job-form.html">发布职位</a>' +
-              '<a href="assessment.html">人才库</a>' +
+              '<a href="jobs-internal.html">职位管理</a>' +
+              '<a href="candidates.html">候选人库</a>' +
+              '<a href="assessment.html">评估记录</a>' +
               '<a href="channels.html">渠道管理</a>' +
             '</div>' +
           '</div>' +

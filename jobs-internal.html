@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>职位管理 - Sunwood Consulting</title>
+  <script src="supabase.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
+    .container{max-width:1200px;margin:0 auto;padding:20px}
+    header{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border-radius:0 0 20px 20px;margin-bottom:30px}
+    header h1{font-size:1.8rem;font-weight:600;margin-bottom:8px;letter-spacing:1px}
+    header p{opacity:.9;font-size:.95rem}
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:15px;margin-bottom:25px}
+    .stat-card{background:#fff;padding:18px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:center}
+    .stat-card .number{font-size:1.8rem;font-weight:700;color:#1e3a5f}
+    .stat-card .label{font-size:.85rem;color:#666;margin-top:4px}
+    .filters{background:#fff;padding:20px;border-radius:12px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .filters h2{color:#1e3a5f;font-size:1.1rem;margin-bottom:15px}
+    .filter-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px}
+    .filter-group label{font-size:.85rem;color:#666;margin-bottom:5px;display:block}
+    .filter-group input,.filter-group select{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:.9rem}
+    .btn{display:inline-block;padding:8px 16px;background:#1e3a5f;color:#fff;border:none;border-radius:6px;font-size:.85rem;cursor:pointer;text-decoration:none;transition:opacity .2s}
+    .btn:hover{opacity:.9}
+    .btn.small{padding:6px 12px;font-size:.8rem}
+    .btn.secondary{background:#fff;color:#1e3a5f;border:1.5px solid #1e3a5f}
+    .table-wrap{overflow-x:auto;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    table{width:100%;border-collapse:collapse;font-size:.9rem}
+    th,td{padding:12px;text-align:left;border-bottom:1px solid #eee}
+    th{background:#f8fafc;color:#1e3a5f;font-weight:600}
+    td{color:#555}
+    tr:hover{background:#f8fafc}
+    .status-badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:.75rem;font-weight:600}
+    .status-招聘中{background:#d1fae5;color:#065f46}
+    .status-暂停{background:#fef3c7;color:#92400e}
+    .status-已关闭{background:#fee2e2;color:#991b1b}
+    .status-已录用{background:#dbeafe;color:#1e40af}
+    .public-badge{display:inline-block;padding:3px 8px;border-radius:12px;font-size:.7rem;background:#e0f2fe;color:#1e40af;font-weight:600}
+    .public-badge.private{background:#f3f4f6;color:#6b7280}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .message{padding:12px 15px;border-radius:8px;margin-bottom:20px;display:none;font-size:.9rem}
+    .message.success{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+    .message.error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+    .empty{text-align:center;padding:50px;color:#888}
+    footer{text-align:center;padding:30px;color:#999;font-size:.8rem}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SUNWOOD CONSULTING</h1>
+    <p>Future Management Consulting · Migration and Recruitment Service</p>
+  </header>
+
+  <div class="container">
+    <div class="stats" id="stats">
+      <div class="stat-card"><div class="number" id="statTotal">-</div><div class="label">全部职位</div></div>
+      <div class="stat-card"><div class="number" id="statActive">-</div><div class="label">招聘中</div></div>
+      <div class="stat-card"><div class="number" id="statPaused">-</div><div class="label">暂停</div></div>
+      <div class="stat-card"><div class="number" id="statClosed">-</div><div class="label">已关闭</div></div>
+    </div>
+
+    <div class="filters">
+      <h2>筛选职位</h2>
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>搜索职位/公司</label>
+          <input type="text" id="searchInput" placeholder="职位名称或公司名称">
+        </div>
+        <div class="filter-group">
+          <label>状态</label>
+          <select id="statusFilter">
+            <option value="">全部</option>
+            <option>招聘中</option>
+            <option>暂停</option>
+            <option>已关闭</option>
+            <option>已录用</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>职能分类</label>
+          <select id="categoryFilter">
+            <option value="">全部</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>负责顾问</label>
+          <select id="recruiterFilter">
+            <option value="">全部</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div id="msg" class="message"></div>
+
+    <div class="table-wrap">
+      <table id="jobsTable">
+        <thead>
+          <tr>
+            <th>职位名称</th>
+            <th>公司</th>
+            <th>分类/级别</th>
+            <th>地点</th>
+            <th>状态</th>
+            <th>公开</th>
+            <th>申请人</th>
+            <th>负责顾问</th>
+            <th>发布时间</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="jobsBody">
+          <tr><td colspan="10" class="empty">加载中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 Sunwood Consulting Group. All rights reserved.</p>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+
+    let allJobs = [];
+    let allApplications = [];
+
+    async function loadData() {
+      const tbody = document.getElementById('jobsBody');
+      tbody.innerHTML = '<tr><td colspan="10" class="empty">加载中...</td></tr>';
+
+      const [{ data: jobs, error: jobsError }, { data: apps, error: appsError }] = await Promise.all([
+        supabaseClient.from('jobs').select('*').order('created_at', { ascending: false }),
+        supabaseClient.from('applications').select('id,job_id,status')
+      ]);
+
+      if (jobsError) {
+        tbody.innerHTML = '<tr><td colspan="10" class="empty">加载失败：' + jobsError.message + '</td></tr>';
+        return;
+      }
+
+      allJobs = jobs || [];
+      allApplications = apps || [];
+      updateStats();
+      populateFilters();
+      renderJobs(allJobs);
+    }
+
+    function updateStats() {
+      document.getElementById('statTotal').textContent = allJobs.length;
+      document.getElementById('statActive').textContent = allJobs.filter(j => j.status === '招聘中').length;
+      document.getElementById('statPaused').textContent = allJobs.filter(j => j.status === '暂停').length;
+      document.getElementById('statClosed').textContent = allJobs.filter(j => j.status === '已关闭' || j.status === '已录用').length;
+    }
+
+    function populateFilters() {
+      const categories = [...new Set(allJobs.map(j => j.category).filter(Boolean))].sort();
+      const recruiters = [...new Set(allJobs.map(j => j.recruiter_id || j.recruiter_name).filter(Boolean))].sort();
+
+      const catSelect = document.getElementById('categoryFilter');
+      catSelect.innerHTML = '<option value="">全部</option>';
+      categories.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        catSelect.appendChild(opt);
+      });
+
+      const recSelect = document.getElementById('recruiterFilter');
+      recSelect.innerHTML = '<option value="">全部</option>';
+      recruiters.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r;
+        opt.textContent = r;
+        recSelect.appendChild(opt);
+      });
+    }
+
+    function getApplicantCount(jobId) {
+      return allApplications.filter(a => a.job_id === jobId).length;
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '-';
+      const d = new Date(iso);
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function renderJobs(jobs) {
+      const tbody = document.getElementById('jobsBody');
+      if (!jobs || jobs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="empty">暂无职位</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = jobs.map(job => {
+        const count = getApplicantCount(job.id);
+        const statusClass = 'status-' + (job.status || '招聘中');
+        return '<tr>' +
+          '<td><strong>' + escapeHtml(job.title) + '</strong></td>' +
+          '<td>' + escapeHtml(job.company_name || '-') + '</td>' +
+          '<td>' + escapeHtml(job.category || '-') + '<br><span style="color:#888;font-size:.8rem">' + escapeHtml(job.level || '') + '</span></td>' +
+          '<td>' + escapeHtml(job.location || '-') + '</td>' +
+          '<td>' +
+            '<select class="status-select" data-id="' + job.id + '" style="padding:4px 8px;border-radius:6px;border:1px solid #ddd;font-size:.85rem">' +
+              '<option value="招聘中"' + (job.status === '招聘中' ? ' selected' : '') + '>招聘中</option>' +
+              '<option value="暂停"' + (job.status === '暂停' ? ' selected' : '') + '>暂停</option>' +
+              '<option value="已关闭"' + (job.status === '已关闭' ? ' selected' : '') + '>已关闭</option>' +
+              '<option value="已录用"' + (job.status === '已录用' ? ' selected' : '') + '>已录用</option>' +
+            '</select>' +
+          '</td>' +
+          '<td>' + (job.is_public ? '<span class="public-badge">公开</span>' : '<span class="public-badge private">不公开</span>') + '</td>' +
+          '<td>' + (count > 0 ? '<a href="candidates.html?job_id=' + job.id + '">' + count + ' 人</a>' : '0 人') + '</td>' +
+          '<td>' + escapeHtml(job.recruiter_id || job.recruiter_name || '-') + '</td>' +
+          '<td>' + formatDate(job.created_at) + '</td>' +
+          '<td class="actions">' +
+            '<a class="btn small" href="job-detail-public.html?id=' + job.id + '" target="_blank">详情</a>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+
+      document.querySelectorAll('.status-select').forEach(sel => {
+        sel.addEventListener('change', async (e) => {
+          const id = e.target.dataset.id;
+          const newStatus = e.target.value;
+          const { error } = await supabaseClient.from('jobs').update({ status: newStatus }).eq('id', id);
+          if (error) {
+            showMsg('更新失败：' + error.message, 'error');
+          } else {
+            showMsg('状态已更新为 ' + newStatus, 'success');
+            const job = allJobs.find(j => j.id === id);
+            if (job) job.status = newStatus;
+            updateStats();
+          }
+        });
+      });
+    }
+
+    function showMsg(text, type) {
+      const msg = document.getElementById('msg');
+      msg.style.display = 'block';
+      msg.className = 'message ' + type;
+      msg.textContent = text;
+      setTimeout(() => { msg.style.display = 'none'; }, 3000);
+    }
+
+    function filterJobs() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const status = document.getElementById('statusFilter').value;
+      const category = document.getElementById('categoryFilter').value;
+      const recruiter = document.getElementById('recruiterFilter').value;
+
+      const filtered = allJobs.filter(job => {
+        const matchSearch = !search ||
+          (job.title || '').toLowerCase().includes(search) ||
+          (job.company_name || '').toLowerCase().includes(search);
+        const matchStatus = !status || job.status === status;
+        const matchCategory = !category || job.category === category;
+        const matchRecruiter = !recruiter || (job.recruiter_id === recruiter || job.recruiter_name === recruiter);
+        return matchSearch && matchStatus && matchCategory && matchRecruiter;
+      });
+
+      renderJobs(filtered);
+    }
+
+    ['searchInput', 'statusFilter', 'categoryFilter', 'recruiterFilter'].forEach(id => {
+      document.getElementById(id).addEventListener('input', filterJobs);
+      document.getElementById(id).addEventListener('change', filterJobs);
+    });
+
+    loadData();
+  </script>
+</body>
+</html>
