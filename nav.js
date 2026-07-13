@@ -154,6 +154,7 @@
     '#sunwood-nav .nav-group > span{display:block;padding:8px 12px;color:#444;font-size:.9rem;font-weight:500;cursor:pointer;border-radius:6px}' +
     '#sunwood-nav .nav-group > span:hover{background:#f1f5f9;color:#1e3a5f}' +
     '#sunwood-nav .dropdown{display:none;position:absolute;top:100%;left:0;background:#fff;min-width:170px;box-shadow:0 8px 20px rgba(0,0,0,.1);border-radius:8px;padding:8px 0;margin-top:4px}' +
+    '#sunwood-nav .dropdown::before{content:"";position:absolute;top:-4px;left:0;right:0;height:4px}' +
     '#sunwood-nav .dropdown a{display:block;padding:8px 16px;color:#444;font-size:.9rem;white-space:nowrap}' +
     '#sunwood-nav .dropdown a:hover{background:#f1f5f9;color:#1e3a5f}' +
     '#sunwood-nav .nav-group:hover .dropdown{display:block}' +
