@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>客户详情 - Sunwood Consulting</title>
+  <script src="supabase.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
+    .container{max-width:1000px;margin:0 auto;padding:20px}
+    header{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border-radius:0 0 20px 20px;margin-bottom:30px}
+    header h1{font-size:1.8rem;font-weight:600;margin-bottom:8px;letter-spacing:1px}
+    header p{opacity:.9;font-size:.95rem}
+    .back-link{display:inline-block;margin-bottom:20px;color:#1e3a5f;text-decoration:none;font-size:.9rem}
+    .back-link:hover{text-decoration:underline}
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:15px;margin-bottom:25px}
+    .stat-card{background:#fff;padding:18px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:center}
+    .stat-card .number{font-size:1.8rem;font-weight:700;color:#1e3a5f}
+    .stat-card .label{font-size:.85rem;color:#666;margin-top:4px}
+    .section{background:#fff;padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:20px}
+    .section h2{color:#1e3a5f;font-size:1.15rem;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid #e5e7eb}
+    .profile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
+    @media(max-width:600px){.profile-grid{grid-template-columns:1fr}}
+    .profile-item{display:flex;flex-direction:column}
+    .profile-item label{font-size:.8rem;color:#666;margin-bottom:3px}
+    .profile-item span{font-size:.95rem;color:#333;font-weight:500}
+    .status-badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:.75rem;font-weight:600}
+    .status-潜在客户{background:#fef3c7;color:#92400e}
+    .status-合作中{background:#d1fae5;color:#065f46}
+    .status-暂停{background:#fee2e2;color:#991b1b}
+    .status-终止{background:#f3f4f6;color:#6b7280}
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:.9rem}
+    th,td{padding:12px;text-align:left;border-bottom:1px solid #eee}
+    th{background:#f8fafc;color:#1e3a5f;font-weight:600}
+    td{color:#555}
+    tr:hover{background:#f8fafc}
+    .empty{text-align:center;padding:40px;color:#888}
+    .btn{display:inline-block;padding:6px 12px;background:#1e3a5f;color:#fff;border-radius:6px;font-size:.8rem;text-decoration:none}
+    .btn:hover{opacity:.9}
+    .tag{display:inline-block;background:#e0f2fe;color:#1e40af;padding:2px 8px;border-radius:12px;font-size:.75rem;margin-right:4px}
+    footer{text-align:center;padding:30px;color:#999;font-size:.8rem}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SUNWOOD CONSULTING</h1>
+    <p>Future Management Consulting · Migration and Recruitment Service</p>
+  </header>
+
+  <div class="container">
+    <a class="back-link" href="clients.html">← 返回客户列表</a>
+
+    <div id="profileSection" class="section">
+      <p class="empty">加载中...</p>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="section">
+      <h2>历史职位</h2>
+      <div class="table-wrap">
+        <table id="jobsTable">
+          <thead>
+            <tr>
+              <th>职位名称</th>
+              <th>状态</th>
+              <th>地点</th>
+              <th>申请人数</th>
+              <th>已入职</th>
+              <th>发布时间</th>
+            </tr>
+          </thead>
+          <tbody id="jobsBody">
+            <tr><td colspan="6" class="empty">加载中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>已入职人选</h2>
+      <div class="table-wrap">
+        <table id="hiredTable">
+          <thead>
+            <tr>
+              <th>姓名</th>
+              <th>职位</th>
+              <th>入职时间</th>
+              <th>顾问</th>
+            </tr>
+          </thead>
+          <tbody id="hiredBody">
+            <tr><td colspan="4" class="empty">加载中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 Sunwood Consulting Group. All rights reserved.</p>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+
+    const STAGE_LABELS = {
+      sourced: '寻访', screened: '初筛', submitted: '推荐', interview: '面试', offer: 'Offer', hired: '入职', rejected: '放弃'
+    };
+
+    let companyId = null;
+
+    function getParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+
+    companyId = getParam('id');
+
+    async function loadData() {
+      const profileSection = document.getElementById('profileSection');
+      if (!companyId) {
+        profileSection.innerHTML = '<p class="empty">缺少客户 ID</p>';
+        return;
+      }
+
+      const { data: company, error: companyError } = await supabaseClient
+        .from('companies')
+        .select('*')
+        .eq('id', companyId)
+        .single();
+
+      if (companyError || !company) {
+        profileSection.innerHTML = '<p class="empty">客户不存在或已删除</p>';
+        return;
+      }
+
+      renderProfile(company);
+
+      const [{ data: jobs }, { data: applications }, { data: candidates }] = await Promise.all([
+        supabaseClient.from('jobs').select('*').eq('company_id', companyId).order('created_at', { ascending: false }),
+        supabaseClient.from('applications').select('*').in('job_id', []),
+        supabaseClient.from('candidate_assessments').select('id,name_cn,name_en')
+      ]);
+
+      // Because we need job_ids for applications query, do it after jobs fetch
+      const jobIds = (jobs || []).map(j => j.id);
+      let apps = [];
+      if (jobIds.length > 0) {
+        const { data: appData } = await supabaseClient.from('applications').select('*').in('job_id', jobIds).order('updated_at', { ascending: false });
+        apps = appData || [];
+      }
+
+      const candidateMap = {};
+      (candidates || []).forEach(c => candidateMap[c.id] = c);
+
+      updateStats(jobs || [], apps);
+      renderJobs(jobs || [], apps);
+      renderHired(apps, jobs || [], candidateMap);
+    }
+
+    function renderProfile(c) {
+      const section = document.getElementById('profileSection');
+      section.innerHTML =
+        '<h2>' + escapeHtml(c.company_name || '-') + ' <span class="status-badge status-' + (c.client_status || '潜在客户') + '">' + (c.client_status || '潜在客户') + '</span></h2>' +
+        '<div class="profile-grid" style="margin-top:15px">' +
+          '<div class="profile-item"><label>行业</label><span>' + escapeHtml(c.industry || '-') + '</span></div>' +
+          '<div class="profile-item"><label>主要联系人</label><span>' + escapeHtml(c.primary_contact || c.contact_name || '-') + '</span></div>' +
+          '<div class="profile-item"><label>联系人邮箱</label><span>' + escapeHtml(c.contact_email || '-') + '</span></div>' +
+          '<div class="profile-item"><label>联系人电话</label><span>' + escapeHtml(c.contact_phone || '-') + '</span></div>' +
+          '<div class="profile-item"><label>负责顾问</label><span>' + escapeHtml(c.account_manager || '-') + '</span></div>' +
+          '<div class="profile-item"><label>结算方式</label><span>' + escapeHtml(c.billing_terms || '-') + '</span></div>' +
+          '<div class="profile-item"><label>公司规模</label><span>' + escapeHtml(c.company_size || '-') + '</span></div>' +
+          '<div class="profile-item"><label>ABN</label><span>' + escapeHtml(c.abn || '-') + '</span></div>' +
+        '</div>' +
+        (c.recruitment_notes ? '<div style="margin-top:15px"><label style="font-size:.8rem;color:#666">招聘备注</label><p style="margin-top:4px;color:#555">' + escapeHtml(c.recruitment_notes) + '</p></div>' : '');
+    }
+
+    function updateStats(jobs, apps) {
+      const activeJobs = jobs.filter(j => j.status === '招聘中').length;
+      const totalApps = apps.length;
+      const hired = apps.filter(a => a.status === 'hired').length;
+      document.getElementById('stats').innerHTML =
+        '<div class="stat-card"><div class="number">' + jobs.length + '</div><div class="label">历史职位</div></div>' +
+        '<div class="stat-card"><div class="number">' + activeJobs + '</div><div class="label">在招职位</div></div>' +
+        '<div class="stat-card"><div class="number">' + totalApps + '</div><div class="label">总申请数</div></div>' +
+        '<div class="stat-card"><div class="number">' + hired + '</div><div class="label">已入职</div></div>';
+    }
+
+    function renderJobs(jobs, apps) {
+      const tbody = document.getElementById('jobsBody');
+      if (jobs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty">暂无职位</td></tr>';
+        return;
+      }
+      tbody.innerHTML = jobs.map(j => {
+        const appCount = apps.filter(a => a.job_id === j.id).length;
+        const hiredCount = apps.filter(a => a.job_id === j.id && a.status === 'hired').length;
+        return '<tr>' +
+          '<td><strong>' + escapeHtml(j.title) + '</strong></td>' +
+          '<td><span class="status-badge status-' + (j.status || '招聘中') + '">' + (j.status || '招聘中') + '</span></td>' +
+          '<td>' + escapeHtml(j.location || '-') + '</td>' +
+          '<td>' + (appCount > 0 ? '<a href="candidates.html?job_id=' + j.id + '">' + appCount + ' 人</a>' : '0') + '</td>' +
+          '<td>' + hiredCount + ' 人</td>' +
+          '<td>' + formatDate(j.created_at) + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    async function renderHired(apps, jobs, candidateMap) {
+      const tbody = document.getElementById('hiredBody');
+      const hiredApps = apps.filter(a => a.status === 'hired');
+      if (hiredApps.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty">暂无已入职人选</td></tr>';
+        return;
+      }
+
+      const jobMap = {};
+      jobs.forEach(j => jobMap[j.id] = j);
+
+      // Ensure candidate names loaded
+      const missingCandidateIds = hiredApps.map(a => a.candidate_id).filter(id => id && !candidateMap[id]);
+      if (missingCandidateIds.length > 0) {
+        const { data: extraCandidates } = await supabaseClient.from('candidate_assessments').select('id,name_cn,name_en').in('id', missingCandidateIds);
+        (extraCandidates || []).forEach(c => candidateMap[c.id] = c);
+      }
+
+      tbody.innerHTML = hiredApps.map(a => {
+        const cand = candidateMap[a.candidate_id] || {};
+        const job = jobMap[a.job_id] || {};
+        return '<tr>' +
+          '<td>' + escapeHtml(cand.name_cn || a.candidate_name || '-') + '</td>' +
+          '<td>' + escapeHtml(job.title || '-') + '</td>' +
+          '<td>' + formatDate(a.updated_at) + '</td>' +
+          '<td>' + escapeHtml(a.recruiter_id || a.owner || '-') + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '-';
+      const d = new Date(iso);
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    loadData();
+  </script>
+</body>
+</html>

@@ -55,7 +55,7 @@
 
   // 导航链接数据
   const modules = [
-    { label: 'Zed 看板', href: 'dashboard.html' },
+    { label: '管理层看板', href: 'dashboard.html' },
     { label: '客户管理', href: 'clients.html' },
     { label: '公司管理', href: 'companies.html' },
     { label: '项目管理', href: 'projects.html' },
@@ -127,7 +127,7 @@
           '<div class="nav-group">' +
             '<span>内部管理</span>' +
             '<div class="dropdown">' +
-              '<a href="dashboard.html">Zed 看板</a>' +
+              '<a href="dashboard.html">管理层看板</a>' +
               '<a href="training.html">培训</a>' +
               '<a href="performance.html">绩效</a>' +
               '<a href="hr.html">HR</a>' +

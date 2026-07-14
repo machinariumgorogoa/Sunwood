@@ -196,7 +196,7 @@
         const jobCount = getJobCount(c.id);
         const hiredCount = getHiredCount(c.id);
         return '<tr>' +
-          '<td><strong>' + escapeHtml(c.company_name || '-') + '</strong></td>' +
+          '<td><strong><a href="client-detail.html?id=' + c.id + '" style="color:#1e3a5f;text-decoration:none">' + escapeHtml(c.company_name || '-') + '</a></strong></td>' +
           '<td>' + escapeHtml(c.industry || '-') + '</td>' +
           '<td>' + escapeHtml(c.primary_contact || c.contact_name || '-') + '<br><span style="color:#888;font-size:.8rem">' + escapeHtml(c.contact_email || '') + '</span></td>' +
           '<td>' +
