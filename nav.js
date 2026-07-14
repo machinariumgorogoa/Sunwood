@@ -55,6 +55,7 @@
 
   // 导航链接数据
   const modules = [
+    { label: 'Zed 看板', href: 'dashboard.html' },
     { label: '客户管理', href: 'clients.html' },
     { label: '公司管理', href: 'companies.html' },
     { label: '项目管理', href: 'projects.html' },
@@ -62,6 +63,7 @@
     { label: '发布职位', href: 'job-form.html' },
     { label: '职位管理', href: 'jobs-internal.html' },
     { label: '候选人库', href: 'candidates.html' },
+    { label: '流程看板', href: 'matches.html' },
     { label: '评估记录', href: 'assessment.html' },
     { label: '渠道管理', href: 'channels.html' },
     { label: '内部 AI 工具', href: 'ai-internal.html' },
@@ -110,6 +112,7 @@
               '<a href="job-form.html">发布职位</a>' +
               '<a href="jobs-internal.html">职位管理</a>' +
               '<a href="candidates.html">候选人库</a>' +
+              '<a href="matches.html">流程看板</a>' +
               '<a href="assessment.html">评估记录</a>' +
               '<a href="channels.html">渠道管理</a>' +
             '</div>' +
@@ -124,6 +127,7 @@
           '<div class="nav-group">' +
             '<span>内部管理</span>' +
             '<div class="dropdown">' +
+              '<a href="dashboard.html">Zed 看板</a>' +
               '<a href="training.html">培训</a>' +
               '<a href="performance.html">绩效</a>' +
               '<a href="hr.html">HR</a>' +

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>候选人详情 - Sunwood Consulting</title>
+  <script src="supabase.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
+    .container{max-width:900px;margin:0 auto;padding:20px}
+    header{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border-radius:0 0 20px 20px;margin-bottom:30px}
+    header h1{font-size:1.8rem;font-weight:600;margin-bottom:8px;letter-spacing:1px}
+    header p{opacity:.9;font-size:.95rem}
+    .profile{background:#fff;padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:20px}
+    .profile h2{color:#1e3a5f;font-size:1.3rem;margin-bottom:15px}
+    .profile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
+    @media(max-width:600px){.profile-grid{grid-template-columns:1fr}}
+    .profile-item{display:flex;flex-direction:column}
+    .profile-item label{font-size:.8rem;color:#666;margin-bottom:3px}
+    .profile-item span{font-size:.95rem;color:#333;font-weight:500}
+    .section{background:#fff;padding:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:20px}
+    .section h2{color:#1e3a5f;font-size:1.15rem;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid #e5e7eb}
+    .file-list{display:flex;flex-wrap:wrap;gap:10px}
+    .file-item{display:inline-block;padding:8px 14px;background:#f1f5f9;color:#1e3a5f;border-radius:8px;font-size:.9rem;text-decoration:none}
+    .file-item:hover{background:#e2e8f0}
+    .timeline{position:relative;padding-left:20px}
+    .timeline::before{content:'';position:absolute;left:6px;top:4px;bottom:0;width:2px;background:#e5e7eb}
+    .timeline-item{position:relative;margin-bottom:20px;padding-left:20px}
+    .timeline-item::before{content:'';position:absolute;left:-16px;top:4px;width:10px;height:10px;background:#1e3a5f;border-radius:50%}
+    .timeline-item h4{font-size:1rem;color:#1e3a5f;margin-bottom:4px}
+    .timeline-item .meta{font-size:.8rem;color:#888;margin-bottom:6px}
+    .timeline-item .stage{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.75rem;background:#e0f2fe;color:#1e40af;margin-bottom:6px}
+    .timeline-item p{color:#555;font-size:.9rem}
+    .note-box{margin-top:15px}
+    .note-box textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:.9rem;min-height:80px;resize:vertical}
+    .note-box button{margin-top:8px;padding:8px 16px;background:#1e3a5f;color:#fff;border:none;border-radius:6px;font-size:.9rem;cursor:pointer}
+    .message{padding:12px 15px;border-radius:8px;margin-bottom:20px;display:none;font-size:.9rem}
+    .message.success{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+    .message.error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+    .empty{text-align:center;padding:40px;color:#888}
+    footer{text-align:center;padding:30px;color:#999;font-size:.8rem}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SUNWOOD CONSULTING</h1>
+    <p>Future Management Consulting · Migration and Recruitment Service</p>
+  </header>
+
+  <div class="container">
+    <div id="msg" class="message"></div>
+    <div id="profileSection" class="profile">
+      <p class="empty">加载中...</p>
+    </div>
+
+    <div class="section">
+      <h2>简历与文件</h2>
+      <div class="file-list" id="fileList">
+        <p class="empty">暂无文件</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>顾问备注</h2>
+      <div id="notesDisplay">暂无备注</div>
+      <div class="note-box">
+        <textarea id="notesInput" placeholder="添加或更新顾问备注..."></textarea>
+        <button id="saveNotesBtn">保存备注</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>申请历史</h2>
+      <div class="timeline" id="timeline">
+        <p class="empty">暂无申请记录</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 Sunwood Consulting Group. All rights reserved.</p>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+
+    const STAGE_LABELS = {
+      sourced: '寻访', screened: '初筛', submitted: '推荐', interview: '面试', offer: 'Offer', hired: '入职', rejected: '放弃'
+    };
+
+    let candidateId = null;
+    let candidateData = null;
+
+    function getParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+
+    candidateId = getParam('id');
+
+    async function loadCandidate() {
+      const profileSection = document.getElementById('profileSection');
+      if (!candidateId) {
+        profileSection.innerHTML = '<p class="empty">缺少候选人 ID</p>';
+        return;
+      }
+
+      const { data, error } = await supabaseClient
+        .from('candidate_assessments')
+        .select('*')
+        .eq('id', candidateId)
+        .single();
+
+      if (error || !data) {
+        profileSection.innerHTML = '<p class="empty">候选人不存在或已删除</p>';
+        return;
+      }
+
+      candidateData = data;
+      renderProfile(data);
+      renderFiles(data.document_urls || {});
+      document.getElementById('notesInput').value = data.recruiter_notes || '';
+      document.getElementById('notesDisplay').textContent = data.recruiter_notes || '暂无备注';
+      await loadApplications();
+    }
+
+    function renderProfile(c) {
+      const section = document.getElementById('profileSection');
+      const phone = [c.phone_country_code, c.phone].filter(Boolean).join(' ');
+      section.innerHTML =
+        '<h2>' + escapeHtml(c.name_cn || '-') + (c.name_en ? ' <span style="font-size:.85rem;color:#888;font-weight:400">' + escapeHtml(c.name_en) + '</span>' : '') + '</h2>' +
+        '<div class="profile-grid">' +
+          '<div class="profile-item"><label>邮箱</label><span>' + escapeHtml(c.email || '-') + '</span></div>' +
+          '<div class="profile-item"><label>手机</label><span>' + escapeHtml(phone || '-') + '</span></div>' +
+          '<div class="profile-item"><label>当前职位</label><span>' + escapeHtml(c.current_job_title || '-') + '</span></div>' +
+          '<div class="profile-item"><label>工作年限</label><span>' + (c.total_work_years != null ? c.total_work_years + ' 年' : '-') + '</span></div>' +
+          '<div class="profile-item"><label>当前所在地</label><span>' + escapeHtml(c.current_country || '-') + '</span></div>' +
+          '<div class="profile-item"><label>技能</label><span>' + escapeHtml(c.skills || '-') + '</span></div>' +
+          '<div class="profile-item"><label>来源</label><span>' + escapeHtml(c.source || '-') + '</span></div>' +
+          '<div class="profile-item"><label>归属顾问</label><span>' + escapeHtml(c.owner || '-') + '</span></div>' +
+        '</div>';
+    }
+
+    function renderFiles(documentUrls) {
+      const list = document.getElementById('fileList');
+      const keys = Object.keys(documentUrls).filter(k => documentUrls[k]);
+      if (keys.length === 0) {
+        list.innerHTML = '<p class="empty">暂无文件</p>';
+        return;
+      }
+      const labels = { resume: '简历', language_score: '语言成绩', education_cert: '学历证明', transcript: '成绩单' };
+      list.innerHTML = keys.map(k =>
+        '<a class="file-item" href="' + escapeHtml(documentUrls[k]) + '" target="_blank">' + (labels[k] || k) + '</a>'
+      ).join('');
+    }
+
+    async function loadApplications() {
+      const { data: apps, error } = await supabaseClient
+        .from('applications')
+        .select('*')
+        .eq('candidate_id', candidateId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        document.getElementById('timeline').innerHTML = '<p class="empty">加载失败：' + error.message + '</p>';
+        return;
+      }
+
+      if (!apps || apps.length === 0) {
+        document.getElementById('timeline').innerHTML = '<p class="empty">暂无申请记录</p>';
+        return;
+      }
+
+      const jobIds = [...new Set(apps.map(a => a.job_id).filter(Boolean))];
+      const { data: jobs } = await supabaseClient.from('jobs').select('id,title,company_name').in('id', jobIds);
+      const jobMap = {};
+      (jobs || []).forEach(j => jobMap[j.id] = j);
+
+      const timeline = document.getElementById('timeline');
+      timeline.innerHTML = apps.map(a => {
+        const job = jobMap[a.job_id] || {};
+        const history = (a.metadata && a.metadata.stage_history) || [];
+        let historyHtml = '';
+        if (history.length > 0) {
+          historyHtml = '<p style="margin-top:6px;font-size:.8rem;color:#888">阶段变更：' +
+            history.map(h => (STAGE_LABELS[h.from] || h.from) + ' → ' + (STAGE_LABELS[h.to] || h.to) + ' (' + formatDate(h.at) + ')').join('； ') +
+            '</p>';
+        }
+        return '<div class="timeline-item">' +
+          '<h4>' + escapeHtml(job.title || '未知职位') + '</h4>' +
+          '<div class="meta">' + escapeHtml(job.company_name || 'Sunwood 合作雇主') + ' · 申请于 ' + formatDate(a.created_at) + '</div>' +
+          '<span class="stage">' + (STAGE_LABELS[a.status] || a.status) + '</span>' +
+          (a.stage_notes ? '<p>' + escapeHtml(a.stage_notes) + '</p>' : '') +
+          historyHtml +
+        '</div>';
+      }).join('');
+    }
+
+    document.getElementById('saveNotesBtn').addEventListener('click', async () => {
+      const notes = document.getElementById('notesInput').value.trim();
+      const btn = document.getElementById('saveNotesBtn');
+      btn.disabled = true;
+      btn.textContent = '保存中...';
+      const { error } = await supabaseClient.from('candidate_assessments').update({ recruiter_notes: notes }).eq('id', candidateId);
+      btn.disabled = false;
+      btn.textContent = '保存备注';
+      if (error) {
+        showMsg('保存失败：' + error.message, 'error');
+      } else {
+        document.getElementById('notesDisplay').textContent = notes || '暂无备注';
+        showMsg('备注已保存', 'success');
+      }
+    });
+
+    function showMsg(text, type) {
+      const msg = document.getElementById('msg');
+      msg.style.display = 'block';
+      msg.className = 'message ' + type;
+      msg.textContent = text;
+      setTimeout(() => { msg.style.display = 'none'; }, 3000);
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '-';
+      const d = new Date(iso);
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    loadCandidate();
+  </script>
+</body>
+</html>

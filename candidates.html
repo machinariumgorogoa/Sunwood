@@ -210,7 +210,7 @@
         const count = getApplicationCount(c.id);
         const phone = [c.phone_country_code, c.phone].filter(Boolean).join(' ');
         return '<tr>' +
-          '<td><strong>' + escapeHtml(c.name_cn || '-') + '</strong>' + (c.name_en ? '<br><span style="color:#888;font-size:.8rem">' + escapeHtml(c.name_en) + '</span>' : '') + '</td>' +
+          '<td><strong><a href="candidate-detail.html?id=' + c.id + '" style="color:#1e3a5f;text-decoration:none">' + escapeHtml(c.name_cn || '-') + '</a></strong>' + (c.name_en ? '<br><span style="color:#888;font-size:.8rem">' + escapeHtml(c.name_en) + '</span>' : '') + '</td>' +
           '<td>' + escapeHtml(c.email || '-') + '<br><span style="color:#888;font-size:.8rem">' + escapeHtml(phone) + '</span></td>' +
           '<td>' + escapeHtml(c.current_job_title || '-') + (c.total_work_years != null ? '<br><span style="color:#888;font-size:.8rem">' + c.total_work_years + ' 年经验</span>' : '') + '</td>' +
           '<td>' + escapeHtml(c.current_country || '-') + '</td>' +

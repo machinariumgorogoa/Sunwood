@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zed 看板 - Sunwood Consulting</title>
+  <script src="supabase.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
+    .container{max-width:1200px;margin:0 auto;padding:20px}
+    header{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border-radius:0 0 20px 20px;margin-bottom:30px}
+    header h1{font-size:1.8rem;font-weight:600;margin-bottom:8px;letter-spacing:1px}
+    header p{opacity:.9;font-size:.95rem}
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:25px}
+    .stat-card{background:#fff;padding:22px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:center}
+    .stat-card .number{font-size:2rem;font-weight:700;color:#1e3a5f}
+    .stat-card .label{font-size:.85rem;color:#666;margin-top:6px}
+    .section{background:#fff;padding:22px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:25px}
+    .section h2{color:#1e3a5f;font-size:1.15rem;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid #e5e7eb}
+    .table-wrap{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:.9rem}
+    th,td{padding:12px;text-align:left;border-bottom:1px solid #eee}
+    th{background:#f8fafc;color:#1e3a5f;font-weight:600}
+    td{color:#555}
+    tr:hover{background:#f8fafc}
+    .empty{text-align:center;padding:40px;color:#888}
+    .highlight{color:#1e3a5f;font-weight:700}
+    .tag{display:inline-block;background:#e0f2fe;color:#1e40af;padding:2px 8px;border-radius:12px;font-size:.75rem;margin-right:4px}
+    footer{text-align:center;padding:30px;color:#999;font-size:.8rem}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SUNWOOD CONSULTING</h1>
+    <p>Zed 业务看板 · 猎头与移民服务概览</p>
+  </header>
+
+  <div class="container">
+    <div class="stats" id="stats">
+      <div class="stat-card"><div class="number" id="sActiveJobs">-</div><div class="label">在招职位</div></div>
+      <div class="stat-card"><div class="number" id="sActiveCandidates">-</div><div class="label">活跃候选人</div></div>
+      <div class="stat-card"><div class="number" id="sNewApps">-</div><div class="label">本月新申请</div></div>
+      <div class="stat-card"><div class="number" id="sHiredThisMonth">-</div><div class="label">本月入职</div></div>
+    </div>
+
+    <div class="section">
+      <h2>顾问绩效</h2>
+      <div class="table-wrap">
+        <table id="performanceTable">
+          <thead>
+            <tr>
+              <th>顾问</th>
+              <th>在招职位</th>
+              <th>活跃申请</th>
+              <th>本月新申请</th>
+              <th>本月入职</th>
+            </tr>
+          </thead>
+          <tbody id="performanceBody">
+            <tr><td colspan="5" class="empty">加载中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>最近申请动态</h2>
+      <div class="table-wrap">
+        <table id="activityTable">
+          <thead>
+            <tr>
+              <th>时间</th>
+              <th>候选人</th>
+              <th>职位</th>
+              <th>当前阶段</th>
+              <th>归属顾问</th>
+            </tr>
+          </thead>
+          <tbody id="activityBody">
+            <tr><td colspan="5" class="empty">加载中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>热门职位（按申请人数）</h2>
+      <div class="table-wrap">
+        <table id="hotJobsTable">
+          <thead>
+            <tr>
+              <th>职位</th>
+              <th>公司</th>
+              <th>状态</th>
+              <th>申请人数</th>
+              <th>负责顾问</th>
+            </tr>
+          </thead>
+          <tbody id="hotJobsBody">
+            <tr><td colspan="5" class="empty">加载中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 Sunwood Consulting Group. All rights reserved.</p>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+
+    const STAGE_LABELS = {
+      sourced: '寻访', screened: '初筛', submitted: '推荐', interview: '面试', offer: 'Offer', hired: '入职', rejected: '放弃'
+    };
+
+    let allJobs = [];
+    let allCandidates = [];
+    let allApplications = [];
+
+    async function loadData() {
+      const [{ data: jobs }, { data: cands }, { data: apps }] = await Promise.all([
+        supabaseClient.from('jobs').select('*').order('created_at', { ascending: false }),
+        supabaseClient.from('candidate_assessments').select('id,name_cn,name_en'),
+        supabaseClient.from('applications').select('*').order('updated_at', { ascending: false })
+      ]);
+
+      allJobs = jobs || [];
+      allCandidates = cands || [];
+      allApplications = apps || [];
+
+      renderStats();
+      renderPerformance();
+      renderActivity();
+      renderHotJobs();
+    }
+
+    function getMonthRange() {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      return { start, end };
+    }
+
+    function renderStats() {
+      const { start, end } = getMonthRange();
+      document.getElementById('sActiveJobs').textContent = allJobs.filter(j => j.status === '招聘中').length;
+      document.getElementById('sActiveCandidates').textContent = allCandidates.filter(c => c.is_active !== false).length;
+      document.getElementById('sNewApps').textContent = allApplications.filter(a => {
+        const d = a.created_at ? new Date(a.created_at) : null;
+        return d && d >= start && d < end;
+      }).length;
+      document.getElementById('sHiredThisMonth').textContent = allApplications.filter(a => {
+        return a.status === 'hired' && a.updated_at && new Date(a.updated_at) >= start && new Date(a.updated_at) < end;
+      }).length;
+    }
+
+    function renderPerformance() {
+      const { start, end } = getMonthRange();
+      const recruiters = [...new Set(allApplications.map(a => a.recruiter_id || a.owner).filter(Boolean))].sort();
+
+      const tbody = document.getElementById('performanceBody');
+      if (recruiters.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty">暂无顾问数据</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = recruiters.map(r => {
+        const activeJobs = allJobs.filter(j => (j.recruiter_id === r || j.recruiter_name === r) && j.status === '招聘中').length;
+        const activeApps = allApplications.filter(a => (a.recruiter_id === r || a.owner === r) && a.status !== 'hired' && a.status !== 'rejected').length;
+        const newApps = allApplications.filter(a => {
+          return (a.recruiter_id === r || a.owner === r) && a.created_at && new Date(a.created_at) >= start && new Date(a.created_at) < end;
+        }).length;
+        const hiredThisMonth = allApplications.filter(a => {
+          return (a.recruiter_id === r || a.owner === r) && a.status === 'hired' && a.updated_at && new Date(a.updated_at) >= start && new Date(a.updated_at) < end;
+        }).length;
+        return '<tr>' +
+          '<td class="highlight">' + escapeHtml(r) + '</td>' +
+          '<td>' + activeJobs + '</td>' +
+          '<td>' + activeApps + '</td>' +
+          '<td>' + newApps + '</td>' +
+          '<td>' + hiredThisMonth + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    function renderActivity() {
+      const tbody = document.getElementById('activityBody');
+      const recent = allApplications.slice(0, 10);
+      if (recent.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty">暂无动态</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = recent.map(a => {
+        const cand = allCandidates.find(c => c.id === a.candidate_id) || {};
+        const job = allJobs.find(j => j.id === a.job_id) || {};
+        return '<tr>' +
+          '<td>' + formatDate(a.updated_at) + '</td>' +
+          '<td>' + escapeHtml(cand.name_cn || a.candidate_name || '-') + '</td>' +
+          '<td>' + escapeHtml(job.title || '-') + '</td>' +
+          '<td><span class="tag">' + (STAGE_LABELS[a.status] || a.status) + '</span></td>' +
+          '<td>' + escapeHtml(a.recruiter_id || a.owner || '-') + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    function renderHotJobs() {
+      const tbody = document.getElementById('hotJobsBody');
+      const jobAppCounts = {};
+      allApplications.forEach(a => {
+        if (!a.job_id) return;
+        jobAppCounts[a.job_id] = (jobAppCounts[a.job_id] || 0) + 1;
+      });
+
+      const sorted = allJobs
+        .map(j => ({ ...j, count: jobAppCounts[j.id] || 0 }))
+        .filter(j => j.count > 0)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
+
+      if (sorted.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty">暂无申请数据</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = sorted.map(j => {
+        return '<tr>' +
+          '<td>' + escapeHtml(j.title) + '</td>' +
+          '<td>' + escapeHtml(j.company_name || '-') + '</td>' +
+          '<td>' + escapeHtml(j.status || '-') + '</td>' +
+          '<td>' + j.count + ' 人</td>' +
+          '<td>' + escapeHtml(j.recruiter_id || j.recruiter_name || '-') + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '-';
+      const d = new Date(iso);
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    loadData();
+  </script>
+</body>
+</html>

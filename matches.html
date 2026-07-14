@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>匹配流程看板 - Sunwood Consulting</title>
+  <script src="supabase.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
+    .container{max-width:1400px;margin:0 auto;padding:20px}
+    header{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border-radius:0 0 20px 20px;margin-bottom:30px}
+    header h1{font-size:1.8rem;font-weight:600;margin-bottom:8px;letter-spacing:1px}
+    header p{opacity:.9;font-size:.95rem}
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+    .stat-card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:center}
+    .stat-card .number{font-size:1.6rem;font-weight:700;color:#1e3a5f}
+    .stat-card .label{font-size:.8rem;color:#666;margin-top:4px}
+    .filters{background:#fff;padding:18px 20px;border-radius:12px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .filters h2{color:#1e3a5f;font-size:1.1rem;margin-bottom:12px}
+    .filter-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+    .filter-group label{font-size:.8rem;color:#666;margin-bottom:4px;display:block}
+    .filter-group input,.filter-group select{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:.9rem}
+    .board{display:flex;gap:16px;overflow-x:auto;padding-bottom:10px}
+    @media(max-width:768px){.board{flex-direction:column;overflow-x:visible}}
+    .column{flex:0 0 260px;background:#eef2f6;border-radius:12px;padding:12px;display:flex;flex-direction:column;max-height:calc(100vh - 320px)}
+    @media(max-width:768px){.column{flex:auto;max-height:none}}
+    .column-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:0 4px}
+    .column-header h3{font-size:.95rem;color:#1e3a5f;font-weight:600}
+    .column-header .count{background:#fff;color:#1e3a5f;font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:20px}
+    .column-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+    .card{background:#fff;padding:14px;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);font-size:.9rem}
+    .card .name{font-weight:700;color:#1e3a5f;margin-bottom:4px}
+    .card .job{color:#555;margin-bottom:8px;font-size:.85rem}
+    .card .meta{color:#888;font-size:.75rem;margin-bottom:10px}
+    .card .note{color:#666;font-size:.8rem;background:#f8fafc;padding:8px;border-radius:6px;margin-bottom:10px;word-break:break-word}
+    .card .actions{display:flex;gap:6px;flex-wrap:wrap}
+    .card select{flex:1;min-width:100px;padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:.8rem}
+    .card a{font-size:.75rem;color:#2d5a87;text-decoration:none}
+    .card a:hover{text-decoration:underline}
+    .note-input{width:100%;padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:.8rem;margin-bottom:8px}
+    .message{padding:12px 15px;border-radius:8px;margin-bottom:20px;display:none;font-size:.9rem}
+    .message.success{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+    .message.error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+    .empty{text-align:center;color:#888;font-size:.85rem;padding:20px 0}
+    footer{text-align:center;padding:30px;color:#999;font-size:.8rem}
+    .stage-sourced{border-top:3px solid #94a3b8}
+    .stage-screened{border-top:3px solid #60a5fa}
+    .stage-submitted{border-top:3px solid #a78bfa}
+    .stage-interview{border-top:3px solid #fbbf24}
+    .stage-offer{border-top:3px solid #f97316}
+    .stage-hired{border-top:3px solid #22c55e}
+    .stage-rejected{border-top:3px solid #ef4444}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SUNWOOD CONSULTING</h1>
+    <p>Future Management Consulting · Migration and Recruitment Service</p>
+  </header>
+
+  <div class="container">
+    <div class="stats" id="stats"></div>
+
+    <div class="filters">
+      <h2>筛选申请</h2>
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>搜索候选人 / 职位</label>
+          <input type="text" id="searchInput" placeholder="姓名、邮箱、职位名称">
+        </div>
+        <div class="filter-group">
+          <label>职位</label>
+          <select id="jobFilter"><option value="">全部职位</option></select>
+        </div>
+        <div class="filter-group">
+          <label>顾问</label>
+          <select id="recruiterFilter"><option value="">全部顾问</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div id="msg" class="message"></div>
+
+    <div class="board" id="board">
+      <p class="empty">加载中...</p>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 Sunwood Consulting Group. All rights reserved.</p>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+
+    const STAGES = ['sourced','screened','submitted','interview','offer','hired','rejected'];
+    const STAGE_LABELS = {
+      sourced: 'Sourced 寻访',
+      screened: 'Screened 初筛',
+      submitted: 'Submitted 推荐',
+      interview: 'Interview 面试',
+      offer: 'Offer 谈判',
+      hired: 'Hired 入职',
+      rejected: 'Rejected 放弃'
+    };
+
+    let allApplications = [];
+    let allJobs = {};
+    let allCandidates = {};
+
+    async function loadData() {
+      const board = document.getElementById('board');
+      board.innerHTML = '<p class="empty">加载中...</p>';
+
+      const [{ data: apps, error: appsError }, { data: jobs, error: jobsError }, { data: cands, error: candsError }] = await Promise.all([
+        supabaseClient.from('applications').select('*').order('updated_at', { ascending: false }),
+        supabaseClient.from('jobs').select('id,title,company_name,recruiter_id,recruiter_name'),
+        supabaseClient.from('candidate_assessments').select('id,name_cn,name_en,email,phone,current_country,skills')
+      ]);
+
+      if (appsError) {
+        board.innerHTML = '<p class="empty">加载失败：' + appsError.message + '</p>';
+        return;
+      }
+
+      allApplications = apps || [];
+      (jobs || []).forEach(j => allJobs[j.id] = j);
+      (cands || []).forEach(c => allCandidates[c.id] = c);
+
+      populateFilters();
+      updateStats(allApplications);
+      renderBoard(allApplications);
+    }
+
+    function populateFilters() {
+      const jobSelect = document.getElementById('jobFilter');
+      const jobs = [...new Set(allApplications.map(a => a.job_id).filter(Boolean))].map(id => allJobs[id]).filter(Boolean);
+      jobSelect.innerHTML = '<option value="">全部职位</option>' +
+        jobs.map(j => '<option value="' + j.id + '">' + escapeHtml(j.title) + '</option>').join('');
+
+      const recSelect = document.getElementById('recruiterFilter');
+      const recruiters = [...new Set(allApplications.map(a => a.recruiter_id || a.owner).filter(Boolean))].sort();
+      recSelect.innerHTML = '<option value="">全部顾问</option>' +
+        recruiters.map(r => '<option value="' + escapeHtml(r) + '">' + escapeHtml(r) + '</option>').join('');
+    }
+
+    function updateStats(apps) {
+      const stats = document.getElementById('stats');
+      const stageCounts = {};
+      STAGES.forEach(s => stageCounts[s] = 0);
+      apps.forEach(a => { if (stageCounts[a.status] != null) stageCounts[a.status]++; });
+
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const hiredThisMonth = apps.filter(a => a.status === 'hired' && a.updated_at && new Date(a.updated_at) >= startOfMonth).length;
+      const newThisMonth = apps.filter(a => a.created_at && new Date(a.created_at) >= startOfMonth).length;
+
+      stats.innerHTML =
+        '<div class="stat-card"><div class="number">' + apps.length + '</div><div class="label">全部申请</div></div>' +
+        '<div class="stat-card"><div class="number">' + stageCounts.sourced + '</div><div class="label">寻访</div></div>' +
+        '<div class="stat-card"><div class="number">' + stageCounts.submitted + '</div><div class="label">已推荐</div></div>' +
+        '<div class="stat-card"><div class="number">' + stageCounts.interview + '</div><div class="label">面试中</div></div>' +
+        '<div class="stat-card"><div class="number">' + stageCounts.offer + '</div><div class="label">Offer</div></div>' +
+        '<div class="stat-card"><div class="number">' + stageCounts.hired + '</div><div class="label">已入职</div></div>' +
+        '<div class="stat-card"><div class="number">' + newThisMonth + '</div><div class="label">本月新增</div></div>' +
+        '<div class="stat-card"><div class="number">' + hiredThisMonth + '</div><div class="label">本月入职</div></div>';
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '-';
+      const d = new Date(iso);
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    function renderBoard(apps) {
+      const board = document.getElementById('board');
+      board.innerHTML = '';
+
+      if (!apps || apps.length === 0) {
+        board.innerHTML = '<p class="empty">暂无申请记录</p>';
+        return;
+      }
+
+      const byStage = {};
+      STAGES.forEach(s => byStage[s] = []);
+      apps.forEach(a => {
+        const stage = STAGES.includes(a.status) ? a.status : 'sourced';
+        byStage[stage].push(a);
+      });
+
+      STAGES.forEach(stage => {
+        const col = document.createElement('div');
+        col.className = 'column';
+        col.innerHTML =
+          '<div class="column-header">' +
+            '<h3>' + STAGE_LABELS[stage] + '</h3>' +
+            '<span class="count">' + byStage[stage].length + '</span>' +
+          '</div>' +
+          '<div class="column-body" id="col-' + stage + '"></div>';
+        board.appendChild(col);
+
+        const body = col.querySelector('.column-body');
+        if (byStage[stage].length === 0) {
+          body.innerHTML = '<p class="empty">无</p>';
+        } else {
+          byStage[stage].forEach(app => {
+            const cand = allCandidates[app.candidate_id] || {};
+            const job = allJobs[app.job_id] || {};
+            const card = document.createElement('div');
+            card.className = 'card stage-' + stage;
+            card.innerHTML =
+              '<div class="name">' + escapeHtml(cand.name_cn || app.candidate_name || '未知候选人') + '</div>' +
+              '<div class="job">' + escapeHtml(job.title || '未知职位') + '</div>' +
+              '<div class="meta">' + escapeHtml(cand.email || app.email || '-') + ' · 更新于 ' + formatDate(app.updated_at) + '</div>' +
+              (app.stage_notes ? '<div class="note">' + escapeHtml(app.stage_notes) + '</div>' : '') +
+              '<input type="text" class="note-input" id="note-' + app.id + '" placeholder="阶段备注/反馈（可选）">' +
+              '<div class="actions">' +
+                '<select data-id="' + app.id + '">' +
+                  STAGES.map(s => '<option value="' + s + '"' + (s === stage ? ' selected' : '') + '>' + STAGE_LABELS[s] + '</option>').join('') +
+                '</select>' +
+                '<a href="candidate-detail.html?id=' + app.candidate_id + '" target="_blank">候选人</a>' +
+                '<a href="job-detail-public.html?id=' + app.job_id + '" target="_blank">职位</a>' +
+              '</div>';
+            body.appendChild(card);
+
+            const select = card.querySelector('select');
+            select.addEventListener('change', async () => {
+              const newStage = select.value;
+              const noteInput = document.getElementById('note-' + app.id);
+              const note = noteInput ? noteInput.value.trim() : '';
+              await updateStatus(app.id, stage, newStage, note);
+            });
+          });
+        }
+      });
+    }
+
+    async function updateStatus(id, fromStage, toStage, note) {
+      showMsg('更新中...', 'info');
+
+      const app = allApplications.find(a => a.id === id);
+      if (!app) return;
+
+      const history = (app.metadata && app.metadata.stage_history) || [];
+      history.push({
+        from: fromStage,
+        to: toStage,
+        note: note,
+        at: new Date().toISOString()
+      });
+
+      const update = {
+        status: toStage,
+        updated_at: new Date().toISOString()
+      };
+      if (note) update.stage_notes = note;
+      update.metadata = { ...(app.metadata || {}), stage_history: history };
+
+      const { error } = await supabaseClient.from('applications').update(update).eq('id', id);
+      if (error) {
+        showMsg('更新失败：' + error.message, 'error');
+        return;
+      }
+
+      app.status = toStage;
+      app.stage_notes = note || app.stage_notes;
+      app.metadata = update.metadata;
+      app.updated_at = update.updated_at;
+
+      showMsg('状态已更新为 ' + STAGE_LABELS[toStage], 'success');
+      filterApplications();
+    }
+
+    function showMsg(text, type) {
+      const msg = document.getElementById('msg');
+      msg.style.display = 'block';
+      msg.className = 'message ' + type;
+      msg.textContent = text;
+      if (type === 'success') setTimeout(() => { msg.style.display = 'none'; }, 3000);
+    }
+
+    function filterApplications() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const jobId = document.getElementById('jobFilter').value;
+      const recruiter = document.getElementById('recruiterFilter').value;
+
+      const filtered = allApplications.filter(a => {
+        const cand = allCandidates[a.candidate_id] || {};
+        const job = allJobs[a.job_id] || {};
+        const recruiterValue = a.recruiter_id || a.owner || '';
+        const matchSearch = !search ||
+          (cand.name_cn || '').toLowerCase().includes(search) ||
+          (cand.name_en || '').toLowerCase().includes(search) ||
+          (a.candidate_name || '').toLowerCase().includes(search) ||
+          (a.email || '').toLowerCase().includes(search) ||
+          (job.title || '').toLowerCase().includes(search);
+        const matchJob = !jobId || a.job_id === jobId;
+        const matchRecruiter = !recruiter || recruiterValue === recruiter;
+        return matchSearch && matchJob && matchRecruiter;
+      });
+
+      updateStats(filtered);
+      renderBoard(filtered);
+    }
+
+    ['searchInput','jobFilter','recruiterFilter'].forEach(id => {
+      document.getElementById(id).addEventListener('input', filterApplications);
+      document.getElementById(id).addEventListener('change', filterApplications);
+    });
+
+    loadData();
+  </script>
+</body>
+</html>
