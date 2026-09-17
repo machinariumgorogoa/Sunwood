@@ -30,7 +30,13 @@
   </style>
 </head>
 <body>
+  <script src="supabase.min.js"></script>
   <script src="nav.js"></script>
+<script>
+  (async function () {
+    await window.sunwood.requireAuth();
+  })();
+</script>
 
   <section class="page-header">
     <div class="container">

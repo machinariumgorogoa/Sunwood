@@ -111,12 +111,9 @@
 
   <script src="nav.js"></script>
   <script>
-    const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
-
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false }
-    });
+    (async function () {
+      await window.sunwood.requireAuth();
+      const supabaseClient = window.sunwood.supabase;
 
     const STAGE_LABELS = {
       sourced: '寻访', screened: '初筛', submitted: '推荐', interview: '面试', offer: 'Offer', hired: '入职', rejected: '放弃'
@@ -257,6 +254,7 @@
     }
 
     loadData();
+      })();
   </script>
 </body>
 </html>

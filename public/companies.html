@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>项目管理 - Sunwood CRM</title>
+  <title>公司管理 - Sunwood CRM</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
@@ -24,22 +24,28 @@
   </style>
 </head>
 <body>
+  <script src="supabase.min.js"></script>
   <script src="nav.js"></script>
+<script>
+  (async function () {
+    await window.sunwood.requireAuth();
+  })();
+</script>
 
   <section class="page-header">
     <div class="container">
-      <svg class="page-icon" viewBox="0 0 24 24"><use href="#icon-project"></use></svg>
-      <h1>项目管理</h1>
-      <p>Project & Case Tracking</p>
+      <svg class="page-icon" viewBox="0 0 24 24"><use href="#icon-company"></use></svg>
+      <h1>公司管理</h1>
+      <p>Employer Company Database</p>
     </div>
   </section>
 
   <div class="container">
     <div class="card">
       <h2>功能概述</h2>
-      <p>跟踪每个雇主担保 / 猎头项目的完整生命周期。</p>
+      <p>管理澳洲雇主公司库、招聘需求与雇主担保资质。</p>
       
-        <a href="project-form.html" class="btn">新建项目</a>
+        <a href="company-form.html" class="btn">录入新公司</a>
     </div>
 
     <div class="card">
@@ -47,16 +53,16 @@
       <div class="cards">
 
         <div class="card">
-          <h3>项目看板</h3>
-          <p>按状态查看所有在办项目</p>
+          <h3>公司库</h3>
+          <p>维护所有合作及潜在雇主公司</p>
         </div>
         <div class="card">
-          <h3>关键节点</h3>
-          <p>记录材料准备、递交、获批等里程碑</p>
+          <h3>招聘需求</h3>
+          <p>记录岗位、薪资、人数等需求</p>
         </div>
         <div class="card">
-          <h3>风险预警</h3>
-          <p>标注障碍、风险点与解决方案</p>
+          <h3>担保资质</h3>
+          <p>跟踪 ABN、担保历史、签证类型</p>
         </div>
       </div>
     </div>

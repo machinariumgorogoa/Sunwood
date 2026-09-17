@@ -251,15 +251,9 @@
 
     async function findProfileByEmail(email) {
       if (!email || !email.includes('@')) return null;
-      const { data, error } = await supabaseClient
-        .from('candidate_assessments')
-        .select('*')
-        .eq('email', email)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-      if (error || !data) return null;
-      return data;
+      const { data, error } = await supabaseClient.rpc('get_candidate_for_apply', { p_email: email });
+      if (error || !data || data.length === 0) return null;
+      return data[0];
     }
 
     async function getCompleteProfile() {
@@ -285,19 +279,20 @@
         recruiter_notes: profile.recruiter_notes || null,
         document_urls: profile.document_urls || {},
         source: '官网职位申请',
-        owner: '待分配',
+        owner: profile.owner || '待分配',
+        owner_user_id: profile.owner_user_id || null,
         is_active: true
       };
 
       if (profile.id) {
-        const { error } = await supabaseClient.from('candidate_assessments').update(data).eq('id', profile.id);
+        const { error } = await supabaseClient.rpc('update_candidate_from_apply', { p_id: profile.id, p_payload: data });
         if (error) throw new Error('更新候选人资料失败：' + error.message);
         return profile.id;
       }
 
       const existing = await findProfileByEmail(profile.email);
       if (existing) {
-        const { error } = await supabaseClient.from('candidate_assessments').update(data).eq('id', existing.id);
+        const { error } = await supabaseClient.rpc('update_candidate_from_apply', { p_id: existing.id, p_payload: data });
         if (error) throw new Error('更新候选人资料失败：' + error.message);
         return existing.id;
       }
@@ -310,22 +305,35 @@
     async function createApplications(candidateId, jobIds) {
       const profile = loadProfileLocal();
       const resumeUrl = profile && (profile.resume_url || (profile.document_urls && profile.document_urls.resume));
-      const rows = jobIds.map(jobId => ({
-        job_id: jobId,
-        candidate_id: candidateId,
-        candidate_name: profile.name_cn || profile.name_en || '',
-        email: profile.email || '',
-        phone: profile.phone || null,
-        phone_country_code: profile.phone_country_code || null,
-        current_location: profile.current_country || null,
-        resume_url: resumeUrl || null,
-        document_urls: resumeUrl ? { resume: resumeUrl } : {},
-        cover_letter: profile.recruiter_notes || null,
-        status: 'sourced',
-        source: '官网职位申请',
-        owner: '待分配',
-        recruiter_id: '待分配'
-      }));
+
+      const { data: jobs, error: jobsError } = await supabaseClient
+        .from('jobs')
+        .select('id,recruiter_user_id,recruiter_name')
+        .in('id', jobIds);
+      if (jobsError) throw new Error('获取职位信息失败：' + jobsError.message);
+      const jobMap = {};
+      (jobs || []).forEach(j => { jobMap[j.id] = j; });
+
+      const rows = jobIds.map(jobId => {
+        const job = jobMap[jobId] || {};
+        return {
+          job_id: jobId,
+          candidate_id: candidateId,
+          candidate_name: profile.name_cn || profile.name_en || '',
+          email: profile.email || '',
+          phone: profile.phone || null,
+          phone_country_code: profile.phone_country_code || null,
+          current_location: profile.current_country || null,
+          resume_url: resumeUrl || null,
+          document_urls: resumeUrl ? { resume: resumeUrl } : {},
+          cover_letter: profile.recruiter_notes || null,
+          status: 'sourced',
+          source: '官网职位申请',
+          owner: job.recruiter_name || '待分配',
+          owner_user_id: job.recruiter_user_id || null,
+          recruiter_id: job.recruiter_user_id || null
+        };
+      });
       const { error } = await supabaseClient.from('applications').insert(rows);
       if (error) throw new Error('创建申请记录失败：' + error.message);
     }

@@ -110,21 +110,29 @@
 
   <script src="nav.js"></script>
   <script>
-    const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
-
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false }
-    });
+    (async function () {
+      await window.sunwood.requireAuth();
+      const supabaseClient = window.sunwood.supabase;
+      const currentStaff = await window.sunwood.getCurrentStaff();
 
     const CLIENT_STATUSES = ['潜在客户','合作中','暂停','终止'];
-    const MANAGER_NAMES = ['Alice Zhang','Bob Li','Carol Wang','David Chen','Emma Liu'];
+    let staffList = [];
 
     let allClients = [];
     let allJobs = [];
     let allApplications = [];
 
+    async function loadStaffList() {
+      const { data, error } = await supabaseClient
+        .from('staff')
+        .select('id,display_name,email')
+        .eq('is_active', true)
+        .order('display_name');
+      if (!error && data) staffList = data;
+    }
+
     async function loadData() {
+      await loadStaffList();
       const tbody = document.getElementById('clientsBody');
       tbody.innerHTML = '<tr><td colspan="8" class="empty">加载中...</td></tr>';
 
@@ -207,7 +215,7 @@
           '<td>' +
             '<select class="manager-select" data-id="' + c.id + '" style="padding:4px 8px;border-radius:6px;border:1px solid #ddd;font-size:.85rem">' +
               '<option value="">未分配</option>' +
-              MANAGER_NAMES.map(m => '<option value="' + m + '"' + (m === c.account_manager ? ' selected' : '') + '>' + m + '</option>').join('') +
+              staffList.map(s => '<option value="' + s.id + '"' + (s.id === c.account_manager_user_id || s.display_name === c.account_manager || s.email === c.account_manager ? ' selected' : '') + '>' + escapeHtml(s.display_name || s.email) + '</option>').join('') +
             '</select>' +
           '</td>' +
           '<td>' + (jobCount > 0 ? '<a href="jobs-internal.html?company_id=' + c.id + '">' + jobCount + ' 个</a>' : '0') + '</td>' +
@@ -228,9 +236,22 @@
       document.querySelectorAll('.manager-select').forEach(sel => {
         sel.addEventListener('change', async () => {
           const id = sel.dataset.id;
-          const { error } = await supabaseClient.from('companies').update({ account_manager: sel.value }).eq('id', id);
+          const staff = staffList.find(s => s.id === sel.value);
+          const updateData = {
+            account_manager_user_id: sel.value || null,
+            account_manager: staff ? (staff.display_name || staff.email) : null
+          };
+          const { error } = await supabaseClient.from('companies').update(updateData).eq('id', id);
           if (error) showMsg('更新失败：' + error.message, 'error');
-          else { showMsg('负责顾问已更新', 'success'); const c = allClients.find(x => x.id === id); if (c) c.account_manager = sel.value; populateFilters(); }
+          else {
+            showMsg('负责顾问已更新', 'success');
+            const c = allClients.find(x => x.id === id);
+            if (c) {
+              c.account_manager_user_id = updateData.account_manager_user_id;
+              c.account_manager = updateData.account_manager;
+            }
+            populateFilters();
+          }
         });
       });
     }
@@ -264,6 +285,7 @@
     });
 
     loadData();
+      })();
   </script>
 </body>
 </html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>注册内部账号 - Sunwood Consulting</title>
+  <script src="supabase.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6;min-height:100vh;display:flex;flex-direction:column}
+    .register-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+    .register-card{background:#fff;width:100%;max-width:420px;padding:35px;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.08)}
+    .register-card h1{font-size:1.5rem;color:#1e3a5f;margin-bottom:8px;text-align:center}
+    .register-card p.subtitle{color:#666;font-size:.9rem;text-align:center;margin-bottom:25px}
+    .form-group{margin-bottom:18px}
+    label{display:block;font-weight:600;color:#444;margin-bottom:6px;font-size:.9rem}
+    input[type="email"],input[type="password"],input[type="text"]{width:100%;padding:11px 13px;border:1px solid #ddd;border-radius:8px;font-size:.95rem;transition:border .2s}
+    input:focus{outline:none;border-color:#2d5a87}
+    button[type="submit"]{width:100%;padding:13px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+    button[type="submit"]:hover{opacity:.9}
+    button[type="submit"]:disabled{opacity:.5;cursor:not-allowed}
+    .message{padding:12px 15px;border-radius:8px;margin-bottom:18px;display:none;font-size:.9rem}
+    .message.success{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+    .message.error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+    .message.info{background:#e0f2fe;color:#1e40af;border:1px solid #bae6fd}
+    .note{font-size:.8rem;color:#888;margin-top:4px}
+    .extra-links{display:flex;justify-content:space-between;align-items:center;margin-top:18px;font-size:.85rem}
+    .extra-links a{color:#1e3a5f;text-decoration:none}
+    .extra-links a:hover{text-decoration:underline}
+    footer{text-align:center;padding:25px;color:#999;font-size:.8rem}
+  </style>
+</head>
+<body>
+  <div class="register-wrap">
+    <div class="register-card">
+      <h1>注册内部账号</h1>
+      <p class="subtitle">仅供内部员工使用，注册后请联系管理员分配角色</p>
+      <div id="msg" class="message"></div>
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="email">邮箱</label>
+          <input type="email" id="email" name="email" placeholder="name@sunwood.com" required autofocus>
+        </div>
+        <div class="form-group">
+          <label for="password">密码</label>
+          <input type="password" id="password" name="password" placeholder="至少6位字符" required>
+        </div>
+        <div class="form-group">
+          <label for="password2">确认密码</label>
+          <input type="password" id="password2" name="password2" placeholder="再次输入密码" required>
+        </div>
+        <div class="form-group">
+          <label for="inviteCode">邀请码</label>
+          <input type="text" id="inviteCode" name="inviteCode" placeholder="首次注册超管请输入邀请码">
+          <p class="note">空邀请码将注册为普通 staff 账号，需管理员后续提升权限。</p>
+        </div>
+        <button type="submit" id="submitBtn">注册</button>
+        <div class="extra-links">
+          <a href="login.html">已有账号？去登录</a>
+          <a href="index.html">返回首页</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 Sunwood Consulting Group. All rights reserved.</p>
+  </footer>
+
+  <script src="nav.js"></script>
+  <script>
+    (function () {
+      const form = document.getElementById('registerForm');
+      const msg = document.getElementById('msg');
+      const btn = document.getElementById('submitBtn');
+
+      // 首次超管注册邀请码，注册完成后建议修改或移除本页面
+      const SUPERADMIN_CODE = 'SUNWOOD-ONBOARD-2026';
+
+      function showMessage(text, type) {
+        msg.style.display = 'block';
+        msg.className = 'message ' + type;
+        msg.textContent = text;
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        btn.disabled = true;
+        btn.textContent = '注册中...';
+        msg.style.display = 'none';
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const password2 = document.getElementById('password2').value;
+        const inviteCode = document.getElementById('inviteCode').value.trim();
+
+        if (password !== password2) {
+          showMessage('两次输入的密码不一致', 'error');
+          btn.disabled = false;
+          btn.textContent = '注册';
+          return;
+        }
+        if (password.length < 6) {
+          showMessage('密码长度至少 6 位', 'error');
+          btn.disabled = false;
+          btn.textContent = '注册';
+          return;
+        }
+
+        const isSuperadminInvite = inviteCode === SUPERADMIN_CODE;
+        const role = isSuperadminInvite ? 'superadmin' : 'staff';
+        const displayName = email.split('@')[0];
+
+        const { data, error } = await window.sunwood.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              role: role,
+              display_name: displayName
+            }
+          }
+        });
+
+        if (error) {
+          showMessage('注册失败：' + error.message, 'error');
+          btn.disabled = false;
+          btn.textContent = '注册';
+          return;
+        }
+
+        if (isSuperadminInvite) {
+          showMessage('超管账号注册成功！正在跳转到登录页...', 'success');
+        } else {
+          showMessage('注册成功！请联系管理员分配角色和权限。', 'success');
+        }
+
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 1500);
+      });
+    })();
+  </script>
+</body>
+</html>

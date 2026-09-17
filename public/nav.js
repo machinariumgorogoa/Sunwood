@@ -1,7 +1,125 @@
-// Sunwood CRM 全局导航与图标库
-// 每个页面在 </body> 前引入：<script src="nav.js"></script>
+// Sunwood CRM 全局导航、图标库与认证状态
+// 每个页面在 </body> 前引入：<script src="supabase.min.js"></script>（可选）<script src="nav.js"></script>
 
 (function () {
+  // ==================== Supabase 共享客户端与认证助手 ====================
+  const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
+
+  let supabaseClient = null;
+  if (typeof window !== 'undefined' && window.supabase && window.supabase.createClient) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
+  }
+
+  let currentStaff = null;
+  let readyResolve = null;
+  const readyPromise = new Promise(function (resolve) { readyResolve = resolve; });
+
+  async function refreshStaff(session) {
+    if (!session || !session.user || !supabaseClient) {
+      currentStaff = null;
+      return;
+    }
+    try {
+      const { data, error } = await supabaseClient
+        .from('staff')
+        .select('*')
+        .eq('id', session.user.id)
+        .eq('is_active', true)
+        .single();
+      if (data && !error) {
+        currentStaff = data;
+      } else {
+        currentStaff = {
+          id: session.user.id,
+          email: session.user.email,
+          display_name: session.user.email,
+          role: 'staff'
+        };
+      }
+    } catch (e) {
+      currentStaff = {
+        id: session.user.id,
+        email: session.user.email,
+        display_name: session.user.email,
+        role: 'staff'
+      };
+    }
+  }
+
+  async function initAuth() {
+    if (!supabaseClient) {
+      readyResolve();
+      return;
+    }
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    await refreshStaff(session);
+    renderNavAuth();
+    readyResolve();
+
+    supabaseClient.auth.onAuthStateChange(async function (event, session) {
+      await refreshStaff(session);
+      renderNavAuth();
+    });
+  }
+
+  function renderNavAuth() {
+    const slot = document.getElementById('sunwood-auth-slot');
+    if (!slot) return;
+    if (currentStaff) {
+      slot.innerHTML =
+        '<span style="display:flex;align-items:center;gap:10px">' +
+          '<span title="' + escapeHtml(currentStaff.email) + '">' + escapeHtml(currentStaff.display_name || currentStaff.email) + '</span>' +
+          '<button id="sunwood-logout-btn" style="padding:4px 10px;border:1px solid #1e3a5f;background:#fff;color:#1e3a5f;border-radius:4px;cursor:pointer;font-size:.75rem">退出</button>' +
+        '</span>';
+      const btn = document.getElementById('sunwood-logout-btn');
+      if (btn) btn.addEventListener('click', function (e) { e.preventDefault(); window.sunwood.signOut(); });
+    } else {
+      slot.innerHTML = '<a href="login.html" class="nav-login">登录 / 注册</a>';
+    }
+  }
+
+  function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  window.sunwood = {
+    supabase: supabaseClient,
+    auth: supabaseClient ? supabaseClient.auth : null,
+    ready: readyPromise,
+
+    getCurrentStaff: async function () {
+      await readyPromise;
+      return currentStaff;
+    },
+
+    requireAuth: async function () {
+      await readyPromise;
+      if (!currentStaff) {
+        const redirect = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = 'login.html?redirect=' + redirect;
+        // 阻止后续脚本执行
+        await new Promise(function () {});
+      }
+    },
+
+    signOut: async function () {
+      if (supabaseClient) await supabaseClient.auth.signOut();
+      currentStaff = null;
+      window.location.href = 'index.html';
+    }
+  };
+
+  // ==================== SVG 图标库 ====================
   const icons = {
     migration: '<path d="M21 12l-6-3v-4l-6 3-6-3v11l6 3 6-3 6 3V9z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M15 9l-6 3" fill="none" stroke="currentColor" stroke-width="1.5"/>',
     talent: '<circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M11 8v3l2 2M20 20l-3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
@@ -135,7 +253,7 @@
           '</div>' +
           '<a href="index.html#contact" class="nav-link">联系</a>' +
           '<a href="assessment.html" class="nav-cta ' + activeClass('assessment.html') + '">免费评估</a>' +
-          '<a href="index.html#auth" class="nav-login">登录 / 注册</a>' +
+          '<span id="sunwood-auth-slot" class="nav-login">加载中...</span>' +
         '</div>' +
       '</div>' +
     '</nav>';
@@ -165,7 +283,7 @@
     '#sunwood-nav .nav-cta,#sunwood-nav .nav-login{padding:8px 14px;border-radius:6px;font-size:.85rem;font-weight:600;white-space:nowrap}' +
     '#sunwood-nav .nav-cta{background:linear-gradient(135deg,#1e3a5f 0%,#2d5a87 100%);color:#fff;margin-left:8px}' +
     '#sunwood-nav .nav-cta:hover{opacity:.9}' +
-    '#sunwood-nav .nav-login{color:#1e3a5f;border:1.5px solid #1e3a5f;margin-left:8px}' +
+    '#sunwood-nav .nav-login{color:#1e3a5f;border:1.5px solid #1e3a5f;margin-left:8px;display:inline-flex;align-items:center;min-height:34px}' +
     '#sunwood-nav .nav-login:hover{background:#f1f5f9}' +
     '#sunwood-nav .active{font-weight:700}' +
     '#sunwood-nav .nav-toggle{display:none;background:none;border:none;padding:8px;cursor:pointer}' +
@@ -191,6 +309,9 @@
     const menu = document.getElementById('sunwood-nav-menu');
     menu.classList.toggle('open');
   };
+
+  // 初始化认证状态
+  initAuth();
 })();
 
 // 辅助函数：创建带图标的 SVG 元素
@@ -198,8 +319,6 @@ function sunwoodIcon(name, classes) {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('class', classes || 'icon');
   svg.setAttribute('viewBox', '0 0 24 24');
-  const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-  use.setAttribute('href', '#icon-' + name);
-  svg.appendChild(use);
+  svg.innerHTML = '<use href="#icon-' + name + '"></use>';
   return svg;
 }

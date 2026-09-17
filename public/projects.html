@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>渠道管理 - Sunwood CRM</title>
+  <title>项目管理 - Sunwood CRM</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
@@ -24,21 +24,28 @@
   </style>
 </head>
 <body>
+  <script src="supabase.min.js"></script>
   <script src="nav.js"></script>
+<script>
+  (async function () {
+    await window.sunwood.requireAuth();
+  })();
+</script>
 
   <section class="page-header">
     <div class="container">
-      <svg class="page-icon" viewBox="0 0 24 24"><use href="#icon-channel"></use></svg>
-      <h1>渠道管理</h1>
-      <p>Channel & Partner Management</p>
+      <svg class="page-icon" viewBox="0 0 24 24"><use href="#icon-project"></use></svg>
+      <h1>项目管理</h1>
+      <p>Project & Case Tracking</p>
     </div>
   </section>
 
   <div class="container">
     <div class="card">
       <h2>功能概述</h2>
-      <p>管理合作中介、推荐人、市场渠道来源与转化。</p>
+      <p>跟踪每个雇主担保 / 猎头项目的完整生命周期。</p>
       
+        <a href="project-form.html" class="btn">新建项目</a>
     </div>
 
     <div class="card">
@@ -46,16 +53,16 @@
       <div class="cards">
 
         <div class="card">
-          <h3>渠道列表</h3>
-          <p>维护中介、代理、合作伙伴信息</p>
+          <h3>项目看板</h3>
+          <p>按状态查看所有在办项目</p>
         </div>
         <div class="card">
-          <h3>来源统计</h3>
-          <p>分析客户与项目来源占比</p>
+          <h3>关键节点</h3>
+          <p>记录材料准备、递交、获批等里程碑</p>
         </div>
         <div class="card">
-          <h3>合作记录</h3>
-          <p>跟踪合作协议与结算情况</p>
+          <h3>风险预警</h3>
+          <p>标注障碍、风险点与解决方案</p>
         </div>
       </div>
     </div>

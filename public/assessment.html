@@ -1060,7 +1060,13 @@
       const container = document.getElementById('recordsTable');
       container.innerHTML = '<p class="empty">加载中...</p>';
 
-      const { data, error } = await supabaseClient
+      const staff = await window.sunwood.getCurrentStaff();
+      if (!staff) {
+        container.innerHTML = '<p class="empty" style="color:#991b1b">请先登录内部账号后再查看记录。</p>';
+        return;
+      }
+
+      const { data, error } = await window.sunwood.supabase
         .from('candidate_assessments')
         .select('*')
         .order('created_at', { ascending: false })

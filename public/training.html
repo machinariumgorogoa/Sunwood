@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>公司管理 - Sunwood CRM</title>
+  <title>培训管理 - Sunwood CRM</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
@@ -24,22 +24,27 @@
   </style>
 </head>
 <body>
+  <script src="supabase.min.js"></script>
   <script src="nav.js"></script>
+<script>
+  (async function () {
+    await window.sunwood.requireAuth();
+  })();
+</script>
 
   <section class="page-header">
     <div class="container">
-      <svg class="page-icon" viewBox="0 0 24 24"><use href="#icon-company"></use></svg>
-      <h1>公司管理</h1>
-      <p>Employer Company Database</p>
+      <svg class="page-icon" viewBox="0 0 24 24"><use href="#icon-training"></use></svg>
+      <h1>培训管理</h1>
+      <p>Training & Knowledge Base</p>
     </div>
   </section>
 
   <div class="container">
     <div class="card">
       <h2>功能概述</h2>
-      <p>管理澳洲雇主公司库、招聘需求与雇主担保资质。</p>
+      <p>管理内部培训资料、学习计划与员工培训记录。</p>
       
-        <a href="company-form.html" class="btn">录入新公司</a>
     </div>
 
     <div class="card">
@@ -47,16 +52,16 @@
       <div class="cards">
 
         <div class="card">
-          <h3>公司库</h3>
-          <p>维护所有合作及潜在雇主公司</p>
+          <h3>培训资料库</h3>
+          <p>集中存储移民政策、业务流程文档</p>
         </div>
         <div class="card">
-          <h3>招聘需求</h3>
-          <p>记录岗位、薪资、人数等需求</p>
+          <h3>学习计划</h3>
+          <p>安排新员工及持续学习计划</p>
         </div>
         <div class="card">
-          <h3>担保资质</h3>
-          <p>跟踪 ABN、担保历史、签证类型</p>
+          <h3>培训记录</h3>
+          <p>跟踪学习进度与考核结果</p>
         </div>
       </div>
     </div>

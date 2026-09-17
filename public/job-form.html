@@ -162,11 +162,6 @@
           <label>负责顾问<span class="req">*</span></label>
           <select name="recruiter_id" id="recruiterSelect" required>
             <option value="">请选择</option>
-            <option>Alice Zhang</option>
-            <option>Bob Li</option>
-            <option>Carol Wang</option>
-            <option>David Chen</option>
-            <option>Emma Liu</option>
           </select>
         </div>
       </div>
@@ -256,12 +251,31 @@
 
   <script src="nav.js"></script>
   <script>
-    const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
+    (async function () {
+      await window.sunwood.requireAuth();
+      const supabaseClient = window.sunwood.supabase;
+      const currentStaff = await window.sunwood.getCurrentStaff();
 
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false }
-    });
+      async function loadRecruiters() {
+        const { data: staff, error } = await supabaseClient
+          .from('staff')
+          .select('id,display_name,email')
+          .eq('is_active', true)
+          .order('display_name');
+        const sel = document.getElementById('recruiterSelect');
+        sel.innerHTML = '<option value="">请选择</option>';
+        if (error || !staff) return;
+        staff.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s.id;
+          opt.textContent = s.display_name || s.email;
+          sel.appendChild(opt);
+        });
+        if (currentStaff && currentStaff.id) {
+          sel.value = currentStaff.id;
+        }
+      }
+      await loadRecruiters();
 
     function showMsg(text, type) {
       const msg = document.getElementById('msg');
@@ -309,6 +323,15 @@
       // 布尔转换
       data.is_public = data.is_public === 'true';
 
+      // 设置负责顾问 UUID + 显示名
+      const recruiterSelect = document.getElementById('recruiterSelect');
+      const recruiterUserId = data.recruiter_id || (currentStaff && currentStaff.id);
+      const recruiterName = recruiterSelect.selectedOptions[0] ? recruiterSelect.selectedOptions[0].text : (currentStaff && currentStaff.display_name);
+      data.recruiter_user_id = recruiterUserId;
+      data.recruiter_name = recruiterName;
+      data.recruiter_id = recruiterUserId;
+      data.created_by = currentStaff && currentStaff.id;
+
       const { error } = await supabaseClient.from('jobs').insert([data]);
 
       if (error) {
@@ -322,6 +345,7 @@
       btn.disabled = false;
       btn.textContent = '发布职位';
     });
+      })();
   </script>
 </body>
 </html>

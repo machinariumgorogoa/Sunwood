@@ -343,28 +343,16 @@
     }
 
     async function findProfileById(id) {
-      const { data, error } = await supabaseClient
-        .from('candidate_assessments')
-        .select('*')
-        .eq('id', id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-      if (error || !data) return null;
-      return data;
+      const { data, error } = await supabaseClient.rpc('get_candidate_for_apply', { p_id: id });
+      if (error || !data || data.length === 0) return null;
+      return data[0];
     }
 
     async function findProfileByEmail(email) {
       if (!email || !email.includes('@')) return null;
-      const { data, error } = await supabaseClient
-        .from('candidate_assessments')
-        .select('*')
-        .eq('email', email)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-      if (error || !data) return null;
-      return data;
+      const { data, error } = await supabaseClient.rpc('get_candidate_for_apply', { p_email: email });
+      if (error || !data || data.length === 0) return null;
+      return data[0];
     }
 
     async function initProfile() {
@@ -456,7 +444,8 @@
     function buildCandidateData(profile, resumeUrl) {
       const data = { ...profile };
       data.source = '官网职位申请';
-      data.owner = '待分配';
+      data.owner = data.owner || '待分配';
+      data.owner_user_id = data.owner_user_id || null;
       data.is_active = true;
       data.document_urls = resumeUrl ? { resume: resumeUrl } : (data.document_urls || {});
       delete data.resume_url;
@@ -468,6 +457,20 @@
 
     async function submitApplication(candidateData, resumeUrl) {
       const candidateId = await upsertCandidate(candidateData, resumeUrl);
+
+      let ownerUserId = null;
+      let ownerName = '待分配';
+      if (jobId) {
+        const { data: job, error: jobError } = await supabaseClient
+          .from('jobs')
+          .select('recruiter_user_id,recruiter_name')
+          .eq('id', jobId)
+          .single();
+        if (!jobError && job) {
+          ownerUserId = job.recruiter_user_id;
+          ownerName = job.recruiter_name || '待分配';
+        }
+      }
 
       const { error: appError } = await supabaseClient.from('applications').insert([{
         job_id: jobId,
@@ -482,8 +485,9 @@
         cover_letter: candidateData.recruiter_notes || null,
         status: 'sourced',
         source: '官网职位申请',
-        owner: '待分配',
-        recruiter_id: '待分配'
+        owner: ownerName,
+        owner_user_id: ownerUserId,
+        recruiter_id: ownerUserId
       }]);
 
       if (appError) throw new Error('申请记录创建失败：' + appError.message);
@@ -533,14 +537,21 @@
 
     async function upsertCandidate(candidateData, resumeUrl) {
       const data = buildCandidateData(candidateData, resumeUrl);
-      if (currentProfile && currentProfile.id) {
-        const { error } = await supabaseClient.from('candidate_assessments').update(data).eq('id', currentProfile.id);
+      const existingId = (currentProfile && currentProfile.id) || null;
+      if (existingId) {
+        const { error } = await supabaseClient.rpc('update_candidate_from_apply', {
+          p_id: existingId,
+          p_payload: data
+        });
         if (error) throw new Error('更新候选人资料失败：' + error.message);
-        return currentProfile.id;
+        return existingId;
       }
       const existing = await findProfileByEmail(data.email);
       if (existing) {
-        const { error } = await supabaseClient.from('candidate_assessments').update(data).eq('id', existing.id);
+        const { error } = await supabaseClient.rpc('update_candidate_from_apply', {
+          p_id: existing.id,
+          p_payload: data
+        });
         if (error) throw new Error('更新候选人资料失败：' + error.message);
         return existing.id;
       }
@@ -566,6 +577,19 @@
         }
 
         const resumeUrl = await uploadResumeIfNeeded();
+
+        if (jobId) {
+          const { data: job, error: jobError } = await supabaseClient
+            .from('jobs')
+            .select('recruiter_user_id,recruiter_name')
+            .eq('id', jobId)
+            .single();
+          if (!jobError && job) {
+            candidateData.owner_user_id = job.recruiter_user_id;
+            candidateData.owner = job.recruiter_name || '待分配';
+          }
+        }
+
         const candidateId = await submitApplication(candidateData, resumeUrl);
 
         // 保存/更新本地缓存
