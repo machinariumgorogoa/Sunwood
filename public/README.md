@@ -4,7 +4,7 @@
 
 **Recruitment & Migration Service Platform · 招聘与移民服务平台**
 
-[![Deploy](https://img.shields.io/badge/Deploy-Vercel-000?logo=vercel)](https://sunwood.vercel.app)
+[![Static](https://img.shields.io/badge/Type-Static%20Site-000)](#-quick-start--快速开始)
 [![Backend](https://img.shields.io/badge/Backend-Supabase-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com)
 [![Frontend](https://img.shields.io/badge/Frontend-Vanilla%20JS-F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![Auth](https://img.shields.io/badge/Auth-RLS%20%2B%20Supabase%20Auth-3ECF8E)](#-architecture--架构)
@@ -36,6 +36,12 @@ python -m http.server 8137
 ```
 
 Database connection lives in a single file — `public/config.js`. | 数据库连接只在一个文件：`public/config.js`。
+
+## 📦 Deployment | 部署
+
+Deploy the `public/` folder to any static hosting — Vercel, Netlify, Cloudflare Pages, or your own server. No build step, no server-side runtime.
+
+将 `public/` 目录部署到任意静态托管即可（Vercel / Netlify / Cloudflare Pages / 自有服务器），无构建步骤、无服务端运行时。
 
 ## 📁 Structure | 目录结构
 
