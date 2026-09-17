@@ -130,8 +130,46 @@
       </div>
 
       <div class="form-group">
+        <label>求职意向</label>
+        <select name="job_category" id="jobCategoryInput">
+          <option value="">请选择（用于匹配未来合适职位）</option>
+          <option>高管/领导层</option>
+          <option>行政/办公支持</option>
+          <option>财务/会计</option>
+          <option>销售/业务拓展</option>
+          <option>市场/品牌/公关</option>
+          <option>人力资源</option>
+          <option>信息技术</option>
+          <option>工程</option>
+          <option>建筑/技工</option>
+          <option>生产/运营</option>
+          <option>物流/仓储/供应链</option>
+          <option>医疗/养老护理</option>
+          <option>教育/培训</option>
+          <option>酒店/旅游/餐饮</option>
+          <option>零售/客户服务</option>
+          <option>法律</option>
+          <option>房地产/物业</option>
+          <option>农业/食品</option>
+          <option>其他</option>
+        </select>
+      </div>
+
+      <div class="form-group">
         <label>当前所在地</label>
-        <input type="text" name="current_country" id="locationInput" placeholder="例如：中国上海 / 澳大利亚悉尼">
+        <div class="row">
+          <div class="form-group">
+            <select name="country" id="countrySelect">
+              <option value="">请选择国家/地区</option>
+              <option>澳大利亚</option>
+              <option>中国</option>
+              <option>其他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <input type="text" name="region" id="regionInput" placeholder="城市 / Suburb / 邮编，如：Box Hill 3128">
+          </div>
+        </div>
       </div>
 
       <div class="form-group">
@@ -148,6 +186,15 @@
         </div>
         <input type="hidden" name="resume_url" id="resumeUrlInput">
         <div class="resume-status" id="resumeStatus" style="display:none"></div>
+      </div>
+
+      <div class="form-group">
+        <label>上传 Cover Letter（PDF/Word，10MB以内，选填）</label>
+        <div class="file-upload" id="coverLetterDropZone">
+          <input type="file" id="coverLetterFile" accept=".pdf,.doc,.docx" hidden>
+          <label for="coverLetterFile" class="file-btn">点击选择文件</label>
+          <p class="file-hint" id="coverLetterStatus">或将文件拖放到此处</p>
+        </div>
       </div>
 
       <button type="submit" id="submitBtn">提交申请</button>
@@ -173,6 +220,7 @@
 
     let currentProfile = null;
     let currentFile = null;
+    let currentCoverFile = null;
     let isOneClickMode = false;
 
     function getParam(name) {
@@ -201,6 +249,8 @@
     const uploadStatus = document.getElementById('uploadStatus');
     const resumeStatus = document.getElementById('resumeStatus');
     const resumeUrlInput = document.getElementById('resumeUrlInput');
+    const coverDropZone = document.getElementById('coverLetterDropZone');
+    const coverStatus = document.getElementById('coverLetterStatus');
     const profileBanner = document.getElementById('profileBanner');
     const profileText = document.getElementById('profileText');
     const oneClickBtn = document.getElementById('oneClickBtn');
@@ -260,6 +310,35 @@
       if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
     });
 
+    function handleCoverFile(file) {
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) {
+        coverStatus.innerHTML = '<span style="color:#dc2626">错误：文件超过10MB限制</span>';
+        currentCoverFile = null;
+        document.getElementById('coverLetterFile').value = '';
+        return;
+      }
+      coverStatus.innerHTML = '已选择：<b>' + escapeHtml(file.name) + '</b>';
+      currentCoverFile = file;
+    }
+
+    document.getElementById('coverLetterFile').addEventListener('change', (e) => handleCoverFile(e.target.files[0]));
+    coverDropZone.addEventListener('dragover', (e) => { e.preventDefault(); coverDropZone.style.borderColor = '#2d5a87'; });
+    coverDropZone.addEventListener('dragleave', () => { coverDropZone.style.borderColor = '#cbd5e1'; });
+    coverDropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      coverDropZone.style.borderColor = '#cbd5e1';
+      if (e.dataTransfer.files.length) handleCoverFile(e.dataTransfer.files[0]);
+    });
+
+    function setCoverStatus(text, url) {
+      if (!text) {
+        coverStatus.textContent = '或将文件拖放到此处';
+        return;
+      }
+      coverStatus.innerHTML = text + (url ? ' <a href="' + escapeHtml(url) + '" target="_blank" style="color:#1e3a5f;text-decoration:underline">查看</a>' : '');
+    }
+
     function getField(name) {
       const el = document.querySelector('[name="' + name + '"]');
       return el ? el.value.trim() : '';
@@ -270,10 +349,16 @@
       if (el) el.value = value || '';
     }
 
+    const KNOWN_COUNTRIES = ['澳大利亚', '中国', '其他'];
+
     function profileFromForm() {
-      const fields = ['name_cn','name_en','phone_country_code','phone','email','current_job_title','total_work_years','skills','current_country','recruiter_notes'];
+      const fields = ['name_cn','name_en','phone_country_code','phone','email','current_job_title','total_work_years','skills','recruiter_notes'];
       const p = {};
       fields.forEach(f => p[f] = getField(f));
+      const country = getField('country');
+      const region = getField('region');
+      p.current_country = [country, region].filter(Boolean).join(' ');
+      p.job_category = getField('job_category');
       p.resume_url = resumeUrlInput.value || (currentProfile && currentProfile.resume_url) || '';
       return p;
     }
@@ -288,7 +373,16 @@
       setField('current_job_title', profile.current_job_title);
       setField('total_work_years', profile.total_work_years);
       setField('skills', profile.skills);
-      setField('current_country', profile.current_country);
+      const cc = profile.current_country || '';
+      const hit = KNOWN_COUNTRIES.find(c => cc.startsWith(c));
+      if (hit) {
+        setField('country', hit);
+        setField('region', cc.slice(hit.length).trim());
+      } else {
+        setField('country', cc ? '其他' : '');
+        setField('region', cc);
+      }
+      setField('job_category', profile.job_category);
       setField('recruiter_notes', profile.recruiter_notes);
 
       const resumeUrl = profile.resume_url || (profile.document_urls && profile.document_urls.resume) || '';
@@ -297,6 +391,10 @@
         setResumeStatus('已关联历史简历', resumeUrl);
       } else {
         setResumeStatus(null);
+      }
+      const coverUrl = profile.document_urls && profile.document_urls.cover_letter;
+      if (coverUrl) {
+        setCoverStatus('已关联历史 Cover Letter', coverUrl);
       }
     }
 
@@ -423,7 +521,9 @@
       resumeUrlInput.value = '';
       uploadStatus.innerHTML = '或将文件拖放到此处';
       currentFile = null;
+      currentCoverFile = null;
       setResumeStatus(null);
+      setCoverStatus(null);
       showMsg('已清除自动填充，请重新填写。', 'info');
     });
 
@@ -441,13 +541,28 @@
       throw new Error('请上传简历');
     }
 
-    function buildCandidateData(profile, resumeUrl) {
+    async function uploadCoverLetterIfNeeded() {
+      if (currentCoverFile) {
+        const fileName = 'cover_letter_' + Date.now() + '_' + currentCoverFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const { error: uploadError } = await supabaseClient
+          .storage.from('resumes').upload(fileName, currentCoverFile, { contentType: currentCoverFile.type });
+        if (uploadError) throw new Error('Cover Letter 上传失败：' + uploadError.message);
+        const { data: urlData } = supabaseClient.storage.from('resumes').getPublicUrl(fileName);
+        return urlData.publicUrl;
+      }
+      return (currentProfile && currentProfile.document_urls && currentProfile.document_urls.cover_letter) || null;
+    }
+
+    function buildCandidateData(profile, resumeUrl, coverLetterUrl) {
       const data = { ...profile };
       data.source = '官网职位申请';
       data.owner = data.owner || '待分配';
       data.owner_user_id = data.owner_user_id || null;
       data.is_active = true;
-      data.document_urls = resumeUrl ? { resume: resumeUrl } : (data.document_urls || {});
+      data.document_urls = { ...(data.document_urls || {}) };
+      if (resumeUrl) data.document_urls.resume = resumeUrl;
+      if (coverLetterUrl) data.document_urls.cover_letter = coverLetterUrl;
+      if (!data.job_category) delete data.job_category;
       delete data.resume_url;
       delete data.id;
       delete data.created_at;
@@ -455,8 +570,8 @@
       return data;
     }
 
-    async function submitApplication(candidateData, resumeUrl) {
-      const candidateId = await upsertCandidate(candidateData, resumeUrl);
+    async function submitApplication(candidateData, resumeUrl, coverLetterUrl) {
+      const candidateId = await upsertCandidate(candidateData, resumeUrl, coverLetterUrl);
 
       let ownerUserId = null;
       let ownerName = '待分配';
@@ -481,7 +596,9 @@
         phone_country_code: candidateData.phone_country_code || null,
         current_location: candidateData.current_country || null,
         resume_url: resumeUrl || null,
-        document_urls: resumeUrl ? { resume: resumeUrl } : {},
+        document_urls: (resumeUrl || coverLetterUrl)
+          ? { ...(resumeUrl ? { resume: resumeUrl } : {}), ...(coverLetterUrl ? { cover_letter: coverLetterUrl } : {}) }
+          : {},
         cover_letter: candidateData.recruiter_notes || null,
         status: 'sourced',
         source: '官网职位申请',
@@ -517,9 +634,12 @@
           throw new Error('请填写所有必填项');
         }
         const resumeUrl = await uploadResumeIfNeeded();
-        const candidateId = await upsertCandidate(candidateData, resumeUrl);
+        const coverLetterUrl = await uploadCoverLetterIfNeeded();
+        const candidateId = await upsertCandidate(candidateData, resumeUrl, coverLetterUrl);
 
         const savedProfile = { ...candidateData, id: candidateId, resume_url: resumeUrl };
+        savedProfile.document_urls = { ...(savedProfile.document_urls || {}) };
+        if (coverLetterUrl) savedProfile.document_urls.cover_letter = coverLetterUrl;
         saveProfileLocal(savedProfile);
         currentProfile = savedProfile;
 
@@ -535,8 +655,8 @@
       }
     }
 
-    async function upsertCandidate(candidateData, resumeUrl) {
-      const data = buildCandidateData(candidateData, resumeUrl);
+    async function upsertCandidate(candidateData, resumeUrl, coverLetterUrl) {
+      const data = buildCandidateData(candidateData, resumeUrl, coverLetterUrl);
       const existingId = (currentProfile && currentProfile.id) || null;
       if (existingId) {
         const { error } = await supabaseClient.rpc('update_candidate_from_apply', {
@@ -569,7 +689,7 @@
 
       try {
         const candidateData = isOneClick && currentProfile
-          ? { ...currentProfile, recruiter_notes: getField('recruiter_notes') }
+          ? { ...currentProfile, recruiter_notes: getField('recruiter_notes'), job_category: getField('job_category') || currentProfile.job_category }
           : profileFromForm();
 
         if (!candidateData.name_cn || !candidateData.email || !candidateData.phone || !candidateData.current_job_title || !candidateData.total_work_years) {
@@ -577,6 +697,7 @@
         }
 
         const resumeUrl = await uploadResumeIfNeeded();
+        const coverLetterUrl = await uploadCoverLetterIfNeeded();
 
         if (jobId) {
           const { data: job, error: jobError } = await supabaseClient
@@ -590,10 +711,13 @@
           }
         }
 
-        const candidateId = await submitApplication(candidateData, resumeUrl);
+        const candidateId = await submitApplication(candidateData, resumeUrl, coverLetterUrl);
 
         // 保存/更新本地缓存
         const savedProfile = { ...candidateData, id: candidateId, resume_url: resumeUrl };
+        savedProfile.document_urls = { ...(savedProfile.document_urls || {}) };
+        if (resumeUrl) savedProfile.document_urls.resume = resumeUrl;
+        if (coverLetterUrl) savedProfile.document_urls.cover_letter = coverLetterUrl;
         saveProfileLocal(savedProfile);
         currentProfile = savedProfile;
 
@@ -604,7 +728,9 @@
           document.getElementById('applyForm').reset();
           uploadStatus.innerHTML = '或将文件拖放到此处';
           currentFile = null;
+          currentCoverFile = null;
           setResumeStatus(null);
+          setCoverStatus(null);
           fillForm(savedProfile);
           showProfileBanner(savedProfile, '资料已保存，可申请下一个职位。');
         }
