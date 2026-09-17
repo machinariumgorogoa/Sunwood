@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>候选人库 - Sunwood Consulting</title>
   <script src="supabase.min.js"></script>
+  <script src="config.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
@@ -131,7 +132,7 @@
       allCandidates = candidates || [];
       allApplications = apps || [];
 
-      // 如果按职位筛选，只保留有申请该职位的候选人
+
       if (jobIdFilter) {
         const candidateIds = [...new Set(allApplications.map(a => a.candidate_id).filter(Boolean))];
         allCandidates = allCandidates.filter(c => candidateIds.includes(c.id));

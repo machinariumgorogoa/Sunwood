@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>客户详情 - Sunwood Consulting</title>
   <script src="supabase.min.js"></script>
+  <script src="config.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
@@ -148,7 +149,7 @@
         supabaseClient.from('candidate_assessments').select('id,name_cn,name_en')
       ]);
 
-      // Because we need job_ids for applications query, do it after jobs fetch
+
       const jobIds = (jobs || []).map(j => j.id);
       let apps = [];
       if (jobIds.length > 0) {
@@ -223,7 +224,7 @@
       const jobMap = {};
       jobs.forEach(j => jobMap[j.id] = j);
 
-      // Ensure candidate names loaded
+
       const missingCandidateIds = hiredApps.map(a => a.candidate_id).filter(id => id && !candidateMap[id]);
       if (missingCandidateIds.length > 0) {
         const { data: extraCandidates } = await supabaseClient.from('candidate_assessments').select('id,name_cn,name_en').in('id', missingCandidateIds);

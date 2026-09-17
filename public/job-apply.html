@@ -1,10 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>申请职位 - Sunwood Consulting</title>
   <script src="supabase.min.js"></script>
+  <script src="config.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
@@ -208,9 +210,6 @@
 
   <script src="nav.js"></script>
   <script>
-    const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
-
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: { persistSession: false, autoRefreshToken: false }
     });
@@ -221,7 +220,6 @@
     let currentProfile = null;
     let currentFile = null;
     let currentCoverFile = null;
-    let isOneClickMode = false;
 
     function getParam(name) {
       const url = new URL(window.location.href);
@@ -469,7 +467,7 @@
 
       let localProfile = loadProfileLocal();
       if (localProfile && localProfile.email) {
-        // 如果本地缓存没有数据库 ID，尝试反查邮箱获取最新记录，避免重复创建候选人
+
         if (!localProfile.id) {
           const dbProfile = await findProfileByEmail(localProfile.email);
           if (dbProfile) {
@@ -713,7 +711,7 @@
 
         const candidateId = await submitApplication(candidateData, resumeUrl, coverLetterUrl);
 
-        // 保存/更新本地缓存
+
         const savedProfile = { ...candidateData, id: candidateId, resume_url: resumeUrl };
         savedProfile.document_urls = { ...(savedProfile.document_urls || {}) };
         if (resumeUrl) savedProfile.document_urls.resume = resumeUrl;

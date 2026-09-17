@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>雇主公司信息登记表 - Sunwood Consulting</title>
   <script src="supabase.min.js"></script>
+  <script src="config.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
@@ -62,7 +63,7 @@
     <div id="msg" class="message"></div>
 
     <form id="companyForm">
-      <!-- 公司基本信息 -->
+      
       <div class="section-title">公司基本信息</div>
       <div class="row">
         <div class="form-group">
@@ -140,7 +141,7 @@
         <input type="text" name="office_address" placeholder="完整街道地址">
       </div>
 
-      <!-- 联系人信息 -->
+      
       <div class="section-title">主要联系人信息</div>
       <div class="row">
         <div class="form-group">
@@ -169,7 +170,7 @@
         <input type="text" name="contact_wechat">
       </div>
 
-      <!-- 招聘/担保需求 -->
+      
       <div class="section-title">招聘与担保需求</div>
       <div class="row">
         <div class="form-group">
@@ -267,7 +268,7 @@
         <textarea name="job_description" placeholder="请描述职位职责、汇报关系、团队规模、工作条件等"></textarea>
       </div>
 
-      <!-- 公司担保资质 -->
+      
       <div class="section-title">公司担保资质</div>
       <div class="row">
         <div class="form-group">
@@ -326,7 +327,7 @@
         </select>
       </div>
 
-      <!-- 其他信息 -->
+      
       <div class="section-title">其他信息</div>
       <div class="form-group">
         <label>希望 Sunwood 提供哪些服务（可多选）</label>
@@ -372,14 +373,11 @@
 
   <script src="nav.js"></script>
   <script>
-    const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
-
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: { persistSession: false, autoRefreshToken: false }
     });
 
-    // 收集多选框值
+
     function collectCheckbox(groupId, inputId) {
       const boxes = document.querySelectorAll('#' + groupId + ' input:checked');
       document.getElementById(inputId).value = Array.from(boxes).map(b => b.value).join(', ');

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>澳洲移民评估 - Sunwood Consulting</title>
   <script src="supabase.min.js"></script>
+  <script src="config.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
@@ -159,7 +160,7 @@
     <div id="msg" class="message"></div>
 
     <form id="assessmentForm">
-      <!-- 服务类型 -->
+      
       <div class="section-title">您希望咨询的服务类型</div>
       <div class="form-group">
         <label>请选择您感兴趣的服务（至少选一项）<span class="req">*</span></label>
@@ -176,7 +177,7 @@
         <input type="hidden" name="consult_service_types" id="serviceTypeInput">
       </div>
 
-      <!-- 基础信息 -->
+      
       <div class="section-title">基础信息</div>
       <div class="row">
         <div class="form-group">
@@ -245,7 +246,7 @@
         </div>
       </div>
 
-      <!-- 教育背景 -->
+      
       <div class="section-title">教育背景</div>
       <div class="row">
         <div class="form-group">
@@ -284,7 +285,7 @@
         </div>
       </div>
 
-      <!-- 低龄留学/游学意向 -->
+      
       <div class="form-group">
         <label>是否有低龄留学/游学/插班意向</label>
         <div class="checkbox-group" id="studyTourGroup">
@@ -296,7 +297,7 @@
         <input type="hidden" name="study_tour_interest" id="studyTourInput">
       </div>
 
-      <!-- 职业背景 -->
+      
       <div class="section-title">职业背景</div>
       <div class="row">
         <div class="form-group">
@@ -329,7 +330,7 @@
         <input type="text" name="work_countries" placeholder="多个国家请用逗号隔开" required>
       </div>
 
-      <!-- 语言能力 -->
+      
       <div class="section-title">语言能力</div>
       <div class="form-group">
         <label>具备何种外语能力（至少选一项）<span class="req">*</span></label>
@@ -413,7 +414,7 @@
         </div>
       </div>
 
-      <!-- 职业评估与证书 -->
+      
       <div class="section-title">职业评估与证书</div>
       <div class="row">
         <div class="form-group">
@@ -443,7 +444,7 @@
         </div>
       </div>
 
-      <!-- 配偶信息 -->
+      
       <div class="section-title">配偶 / 伴侣信息</div>
       <div class="row">
         <div class="form-group">
@@ -542,7 +543,7 @@
         </div>
       </div>
 
-      <!-- 移民意向 -->
+      
       <div class="section-title">移民意向</div>
       <div class="row">
         <div class="form-group">
@@ -656,7 +657,7 @@
         </div>
       </div>
 
-      <!-- 联系方式 -->
+      
       <div class="section-title">联系方式</div>
       <div class="row">
         <div class="form-group">
@@ -691,7 +692,7 @@
         <textarea name="additional_notes"></textarea>
       </div>
 
-      <!-- 资料上传 -->
+      
       <div class="section-title">资料上传</div>
       <div class="upload-grid">
         <div class="form-group upload-item">
@@ -735,7 +736,7 @@
       <p style="text-align:center;margin-top:12px;font-size:.8rem;color:#888">提交即授权收集填写信息，信息将严格保密</p>
     </form>
 
-    <!-- 查询区域 -->
+    
     <div class="query-section">
       <h2>已提交记录查询（管理后台）</h2>
       <button onclick="loadRecords()" style="padding:8px 16px;background:#1e3a5f;color:#fff;border:none;border-radius:6px;cursor:pointer;margin-bottom:15px">刷新数据</button>
@@ -752,14 +753,11 @@
 
   <script src="nav.js"></script>
   <script>
-    const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
-
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       auth: { persistSession: false, autoRefreshToken: false }
     });
 
-    // 通用文件上传组件
+
     function createUploader(config) {
       const { zoneId, inputId, statusId, prefix, accept } = config;
       const zone = document.getElementById(zoneId);
@@ -812,7 +810,7 @@
       };
     }
 
-    // 标签页切换
+
     function setupTabs(containerId) {
       const container = document.getElementById(containerId);
       if (!container) return;
@@ -947,7 +945,7 @@
       collectCheckbox('visaTabs', 'visaCategoriesInput');
       collectCheckbox('reasonGroup', 'reasonInput');
 
-      // 校验必填多选
+
       if (!document.getElementById('serviceTypeInput').value) {
         showMsg('请至少选择一项服务类型', 'error');
         btn.disabled = false; btn.textContent = '提交评估申请';
@@ -969,7 +967,7 @@
         return;
       }
 
-      // 并行上传所有文件
+
       try {
         const [resumeUrl, englishScoreUrl, eduCertUrl, transcriptUrl] = await Promise.all([
           uploaders.resume.upload(),
@@ -988,7 +986,7 @@
       const data = {};
       formData.forEach((v, k) => { if(v !== '' && v !== null && v !== undefined) data[k] = v; });
 
-      // 构建 JSONB 字段
+
       const languageScores = buildLanguageScores();
       if (languageScores) data.language_scores = languageScores;
 
@@ -1000,7 +998,7 @@
       const eduCertUrl = uploaders.eduCert.lastUrl || null;
       const transcriptUrl = uploaders.transcript.lastUrl || null;
 
-      // 构建 document_urls JSONB
+
       const documentUrls = {};
       if (resumeUrl) documentUrls.resume = resumeUrl;
       if (englishScoreUrl) documentUrls.language_score = englishScoreUrl;
@@ -1008,12 +1006,12 @@
       if (transcriptUrl) documentUrls.transcript = transcriptUrl;
       if (Object.keys(documentUrls).length) data.document_urls = documentUrls;
 
-      // has_skills_assessment 转布尔
+
       if (data.has_skills_assessment === 'true') data.has_skills_assessment = true;
       else if (data.has_skills_assessment === 'false') data.has_skills_assessment = false;
       else delete data.has_skills_assessment;
 
-      // 删除已聚合到 JSONB 的原始字段，避免重复存储
+
       delete data.ielts_listening;
       delete data.ielts_speaking;
       delete data.ielts_reading;
@@ -1022,7 +1020,7 @@
       delete data.pte_speaking;
       delete data.pte_reading;
       delete data.pte_writing;
-      // 删除已聚合到 JSONB 的原始字段
+
       ['ielts', 'pte', 'toefl', 'cae', 'oet'].forEach(prefix => {
         delete data[prefix + '_listening'];
         delete data[prefix + '_speaking'];

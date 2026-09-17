@@ -91,7 +91,7 @@
   </style>
 </head>
 <body>
-  <!-- 公开首页内容 -->
+  
   <div id="publicView">
     <section class="hero">
       <h1>Getting YOU on the plane to Australia</h1>
@@ -211,7 +211,7 @@
     </section>
   </div>
 
-  <!-- 登录后仪表盘 -->
+  
   <div id="dashboardView" class="dashboard-view">
     <div class="container">
       <div class="topbar">
@@ -289,7 +289,7 @@
     </div>
   </div>
 
-  <!-- 登录/注册弹窗 -->
+  
   <div id="authModal" class="modal-overlay" onclick="closeAuthOnBackdrop(event)">
     <div class="modal" onclick="event.stopPropagation()">
       <span class="close" onclick="closeAuth()">&times;</span>
@@ -345,6 +345,7 @@
   </footer>
 
   <script src="supabase.min.js"></script>
+  <script src="config.js"></script>
   <script src="nav.js"></script>
   <script>
     let currentUser = null;

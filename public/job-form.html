@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>发布职位 - Sunwood Consulting</title>
   <script src="supabase.min.js"></script>
+  <script src="config.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f5f7fa;color:#333;line-height:1.6}
@@ -300,13 +301,13 @@
       const data = {};
       formData.forEach((v, k) => { if (v !== '') data[k] = v; });
 
-      // 处理工作地点「其他」
+
       if (data.location === '__other__') {
         data.location = data.location_other || '其他';
       }
       delete data.location_other;
 
-      // 构建 requirements JSONB
+
       data.requirements = {
         skills: data.skills_required || null,
         experience: data.experience_required || null,
@@ -320,10 +321,10 @@
       delete data.education_required;
       delete data.visa_required;
 
-      // 布尔转换
+
       data.is_public = data.is_public === 'true';
 
-      // 设置负责顾问 UUID + 显示名
+
       const recruiterSelect = document.getElementById('recruiterSelect');
       const recruiterUserId = data.recruiter_id || (currentStaff && currentStaff.id);
       const recruiterName = recruiterSelect.selectedOptions[0] ? recruiterSelect.selectedOptions[0].text : (currentStaff && currentStaff.display_name);

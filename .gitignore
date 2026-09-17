@@ -3,7 +3,7 @@ docs/
 code/db-migrations/
 AGENTS.md
 rules/
-README.md
+/README.md
 
 # 编辑器/系统文件
 .DS_Store
@@ -17,3 +17,4 @@ Thumbs.db
 assets/
 archive/
 code/*.py
+src/

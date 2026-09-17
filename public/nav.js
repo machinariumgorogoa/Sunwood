@@ -1,10 +1,8 @@
-// Sunwood CRM 全局导航、图标库与认证状态
-// 每个页面在 </body> 前引入：<script src="supabase.min.js"></script>（可选）<script src="nav.js"></script>
+
+
 
 (function () {
-  // ==================== Supabase 共享客户端与认证助手 ====================
-  const SUPABASE_URL = 'https://isaauyxjwdkjciwweuhk.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlzYWF1eXhqd2RramNpd3dldWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MDY4NjksImV4cCI6MjA4OTk4Mjg2OX0.WvE8GkzpqJs7BPRmrayxcu7P0-nFX6rafsZQ0DA3EyY';
+
 
   let supabaseClient = null;
   if (typeof window !== 'undefined' && window.supabase && window.supabase.createClient) {
@@ -107,7 +105,7 @@
       if (!currentStaff) {
         const redirect = encodeURIComponent(window.location.pathname + window.location.search);
         window.location.href = 'login.html?redirect=' + redirect;
-        // 阻止后续脚本执行
+
         await new Promise(function () {});
       }
     },
@@ -119,7 +117,7 @@
     }
   };
 
-  // ==================== SVG 图标库 ====================
+
   const icons = {
     migration: '<path d="M21 12l-6-3v-4l-6 3-6-3v11l6 3 6-3 6 3V9z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M15 9l-6 3" fill="none" stroke="currentColor" stroke-width="1.5"/>',
     talent: '<circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M11 8v3l2 2M20 20l-3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
@@ -153,7 +151,7 @@
     investigate: '<path d="M4 6h16v12H4z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 9h3M7 12h5M7 15h2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="16" cy="11" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M17.5 12.5l2 2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>'
   };
 
-  // 注入 SVG 图标库（供页面内 <use> 引用）
+
   const sprite = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   sprite.setAttribute('style', 'display:none;');
   sprite.setAttribute('aria-hidden', 'true');
@@ -168,10 +166,10 @@
   sprite.appendChild(defs);
   document.body.appendChild(sprite);
 
-  // 当前页面文件名
+
   const currentPage = location.pathname.split('/').pop() || 'index.html';
 
-  // 导航链接数据
+
   const modules = [
     { label: '管理层看板', href: 'dashboard.html' },
     { label: '客户管理', href: 'clients.html' },
@@ -304,17 +302,17 @@
   navWrapper.innerHTML = navHtml;
   document.body.insertBefore(navWrapper.firstElementChild, document.body.firstChild);
 
-  // 全局菜单切换
+
   window.toggleSunwoodNav = function () {
     const menu = document.getElementById('sunwood-nav-menu');
     menu.classList.toggle('open');
   };
 
-  // 初始化认证状态
+
   initAuth();
 })();
 
-// 辅助函数：创建带图标的 SVG 元素
+
 function sunwoodIcon(name, classes) {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('class', classes || 'icon');
